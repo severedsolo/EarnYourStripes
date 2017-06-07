@@ -11,6 +11,7 @@ namespace EarnYourStripes
     {
         public override void OnSave(ConfigNode node)
         {
+            int counter = 0;
             ConfigNode cn = node.GetNode("EarnYourStripes");
             if (cn == null)
             {
@@ -29,10 +30,13 @@ namespace EarnYourStripes
                 if (FlightTracker.instance.promotedKerbals.Contains(v.Key)) temp.SetValue("Promoted", true, true);
                 else temp.SetValue("Promoted", false, true);
                 cn.AddNode(temp);
+                counter++;
             }
+            Debug.Log("[EarnYourStripes]: Saved " + counter + " kerbals flight data");
         }
         public override void OnLoad(ConfigNode node)
         {
+            int counter = 0;
             ConfigNode cn = node.GetNode("EarnYourStripes");
             if (cn == null) return;
             ConfigNode[] loaded = cn.GetNodes("KERBAL");
@@ -54,7 +58,9 @@ namespace EarnYourStripes
                 {
                     if (promoted) FlightTracker.instance.promotedKerbals.Add(s);
                 }
+                counter++;
             }
+            Debug.Log("[EarnYourStripes]: Loaded " + counter + " kerbals flight data");
         }
     }
 }

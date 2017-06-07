@@ -18,11 +18,13 @@ namespace EarnYourStripes
         {
             instance = this;
             DontDestroyOnLoad(this);
+            Debug.Log("[EarnYourStripes]: Flight Tracker is Awake");
         }
         private void Start()
         {
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
+            Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().removeExistingHonours) return;
             StripHonours();
         }
@@ -33,11 +35,16 @@ namespace EarnYourStripes
             for (int i = 0; i < crew.Count(); i++)
             {
                 string p = crew.ElementAt(i).name;
-                if (!promotedKerbals.Contains(p)) crew.ElementAt(i).veteran = false;
+                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran)
+                {
+                    crew.ElementAt(i).veteran = false;
+                    Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
+                }
             }
         }
         private void OnGameSettingsApplied()
         {
+            Debug.Log("[EarnYourStripes]: Game Settings Updated");
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().removeExistingHonours) return;
             StripHonours();
         }
@@ -46,6 +53,7 @@ namespace EarnYourStripes
         {
             Debug.Log("[EarnYourStripes]: Vessel Recovery Attempt Detected");
             List<ProtoCrewMember> crew = v.GetVesselCrew();
+            Debug.Log("[EarnYourStripes]: Processing " + crew.Count() + " Kerbals");
             if (crew.Count == 0) return;
             for (int i = 0; i < crew.Count; i++)
             {
@@ -60,10 +68,12 @@ namespace EarnYourStripes
                 {
                     crew.ElementAt(i).veteran = true;
                     promotedKerbals.Add(p);
-                    Debug.Log("[EarnYourStripes]: Promoted " + crew.ElementAt(i).name);
+                    Debug.Log("[EarnYourStripes]: "+p+" has earned a promotion");
                 }
                 flights.Add(p, recovered);
                 MET.Add(p, d);
+                Debug.Log("[EarnYourStripes]: Processed Recovery of " + p + " - Flights: " + recovered + " Time Logged: " + d + " (" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 + ") required");
+                Debug.Log("[EarnYourStripes]: "+p+" Veteran Status: "+crew.ElementAt(i).veteran);
             }
         }
 
