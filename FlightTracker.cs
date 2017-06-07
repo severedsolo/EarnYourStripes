@@ -64,7 +64,7 @@ namespace EarnYourStripes
                 double d;
                 if (MET.TryGetValue(p, out d)) MET.Remove(p);
                 d = d + v.missionTime;
-                if (!crew.ElementAt(i).veteran && recovered >= HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired && d > HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired*60)
+                if (!crew.ElementAt(i).veteran && recovered >= HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired && d > HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired*60*60)
                 {
                     crew.ElementAt(i).veteran = true;
                     promotedKerbals.Add(p);
@@ -72,14 +72,18 @@ namespace EarnYourStripes
                 }
                 flights.Add(p, recovered);
                 MET.Add(p, d);
-                Debug.Log("[EarnYourStripes]: Processed Recovery of " + p + " - Flights: " + recovered + " Time Logged: " + d + " (" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 + ") required");
-                Debug.Log("[EarnYourStripes]: "+p+" Veteran Status: "+crew.ElementAt(i).veteran);
+                Debug.Log("[EarnYourStripes]: Processed Recovery of " + p);
+                Debug.Log("[EarnYourStripes]: "+p+" - Flights: " + recovered+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired);
+                Debug.Log("[EarnYourStripes]: " + p + " - Time Logged: " + d + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60);
+                Debug.Log("[EarnYourStripes]: "+p+" - Veteran Status: "+crew.ElementAt(i).veteran);
             }
         }
 
         private void OnDestroy()
         {
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
+            GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
+            Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }
 }
