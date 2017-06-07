@@ -1,0 +1,15 @@
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\EarnYourStripes.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\EarnYourStripes.pdb
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\Assembly-CSharp-firstpass.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\Assembly-CSharp.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\UnityEngine.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\TrackIRUnity.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\UnityEngine.UI.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\KSPAssets.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\Mono.Cecil.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\TDx.TDxInput.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\Mono.Security.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\bin\Debug\UnityEngine.xml
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.dll
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.pdb
+C:\Users\evilp\Documents\Visual Studio 2017\Projects\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.csprojResolveAssemblyReference.cache
