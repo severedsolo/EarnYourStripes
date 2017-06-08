@@ -51,3 +51,6 @@ bin/Debug/EarnYourStripes.dll.mdb
 bin/Debug/EarnYourStripes.pdb
 *.cache
 obj/Debug/EarnYourStripes.pdb
+*.mdb
+bin/Release/EarnYourStripes.pdb
+*.pdb
