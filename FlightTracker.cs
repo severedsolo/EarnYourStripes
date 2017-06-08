@@ -25,7 +25,6 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().removeExistingHonours) return;
             StripHonours();
         }
         void StripHonours()
@@ -35,17 +34,35 @@ namespace EarnYourStripes
             for (int i = 0; i < crew.Count(); i++)
             {
                 string p = crew.ElementAt(i).name;
-                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran)
+                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours)
                 {
                     crew.ElementAt(i).veteran = false;
                     Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
+                }
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed) return;
+                switch(crew.ElementAt(i).trait)
+                {
+                    case "Pilot":
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed) crew.ElementAt(i).veteran = false;
+                        Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
+                        break;
+                    case "Scientist":
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed) crew.ElementAt(i).veteran = false;
+                        Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
+                        break;
+                    case "Engineer":
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed) crew.ElementAt(i).veteran = false;
+                        Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
+                        break;
+                    default:
+                        Debug.Log("[EarnYourStripes]: Attempted to remove " + p + "'s veteran status but couldn't figure out what class they were");
+                        break;
                 }
             }
         }
         private void OnGameSettingsApplied()
         {
             Debug.Log("[EarnYourStripes]: Game Settings Updated");
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().removeExistingHonours) return;
             StripHonours();
         }
 
@@ -69,6 +86,7 @@ namespace EarnYourStripes
                     crew.ElementAt(i).veteran = true;
                     promotedKerbals.Add(p);
                     Debug.Log("[EarnYourStripes]: "+p+" has earned a promotion");
+                    StripHonours();
                 }
                 flights.Add(p, recovered);
                 MET.Add(p, d);
