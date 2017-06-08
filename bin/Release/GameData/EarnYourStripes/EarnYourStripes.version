@@ -1,35 +1,35 @@
 {
-    "NAME"     : "UPFM",
-    "URL"      : "https://github.com/severedsolo/UPFM/blob/master/UPFM/Untitled%20Part%20Failure%20Mod/bin/Release/GameData/UPFM.version",
-    "DOWNLOAD" : "https://github.com/severedsolo/UPFM/releases",
+    "NAME"     : "EarnYourStripes",
+    "URL"      : "https://github.com/severedsolo/EarnYourStripes/blob/master/bin/Release/GameData/EarnYourStripes/EarnYourStripes.version",
+    "DOWNLOAD" : "https://github.com/severedsolo/EarnYourStripes/releases",
     "GITHUB" :
     {
         "USERNAME" : "severedsolo",
-        "REPOSITORY" : "UPFM"
+        "REPOSITORY" : "EarnYourStripes"
     },
     "VERSION" :
     {
-        "MAJOR" : 0,
-        "MINOR" : 3,
+        "MAJOR" : 1,
+        "MINOR" : 0,
         "PATCH" : 0,
         "BUILD" : 0
     },
     "KSP_VERSION" :
     {
         "MAJOR" : 1,
-        "MINOR" : 2,
-        "PATCH" : 2
+        "MINOR" : 3,
+        "PATCH" : 0
     },
     "KSP_VERSION_MIN" :
     {
         "MAJOR" : 1,
-        "MINOR" : 2,
-        "PATCH" : 2
+        "MINOR" : 3,
+        "PATCH" : 0
     },
     "KSP_VERSION_MAX" :
     {
         "MAJOR" : 1,
-        "MINOR" : 2,
-        "PATCH" : 2
+        "MINOR" : 3,
+        "PATCH" : 0
     }
 }
