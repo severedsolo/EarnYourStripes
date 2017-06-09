@@ -39,7 +39,7 @@ namespace EarnYourStripes
                     crew.ElementAt(i).veteran = false;
                     Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
                 }
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed) return;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed) continue;
                 switch(crew.ElementAt(i).trait)
                 {
                     case "Pilot":
