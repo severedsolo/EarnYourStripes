@@ -29,6 +29,8 @@ namespace EarnYourStripes
                 if (FlightTracker.instance.MET.TryGetValue(v.Key, out d)) temp.SetValue("TimeLogged", d, true);
                 if (FlightTracker.instance.promotedKerbals.Contains(v.Key)) temp.SetValue("Promoted", true, true);
                 else temp.SetValue("Promoted", false, true);
+                if (FlightTracker.instance.eligibleForPromotion.Contains(v.Key)) temp.SetValue("WorldFirst", true, true);
+                else temp.SetValue("WorldFirst", false, true);
                 cn.AddNode(temp);
                 counter++;
             }
@@ -44,6 +46,7 @@ namespace EarnYourStripes
             FlightTracker.instance.flights.Clear();
             FlightTracker.instance.MET.Clear();
             FlightTracker.instance.promotedKerbals.Clear();
+            FlightTracker.instance.eligibleForPromotion.Clear();
             for(int i = 0; i<loaded.Count();i++)
             {
                 ConfigNode temp = loaded.ElementAt(i);
@@ -57,6 +60,10 @@ namespace EarnYourStripes
                 if (Boolean.TryParse(temp.GetValue("Promoted"), out promoted))
                 {
                     if (promoted) FlightTracker.instance.promotedKerbals.Add(s);
+                }
+                if (Boolean.TryParse(temp.GetValue("WorldFirst"), out promoted))
+                {
+                    if (promoted) FlightTracker.instance.eligibleForPromotion.Add(s);
                 }
                 counter++;
             }

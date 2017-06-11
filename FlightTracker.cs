@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using System.IO;
 
 namespace EarnYourStripes
 {
@@ -13,6 +14,7 @@ namespace EarnYourStripes
         public Dictionary<string, int> flights = new Dictionary<string, int>();
         public Dictionary<string, double> MET = new Dictionary<string, double>();
         public List<string> promotedKerbals = new List<string>();
+        public List<string> eligibleForPromotion = new List<string>();
 
         private void Awake()
         {
@@ -24,9 +26,26 @@ namespace EarnYourStripes
         {
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
+            GameEvents.OnProgressReached.Add(OnProgressReached);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
         }
+
+        private void OnProgressReached(ProgressNode data)
+        {
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) return;
+            if (FlightGlobals.ActiveVessel == null) return;
+            List<ProtoCrewMember> crew = FlightGlobals.ActiveVessel.GetVesselCrew();
+            if (crew.Count == 0) return;
+            for(int i = 0; i<crew.Count; i++)
+            {
+                if (eligibleForPromotion.Contains(crew.ElementAt(i).name)) continue;
+                if (!crew.ElementAt(i).flightLog.HasEntry(FlightLog.EntryType.Orbit)) continue;
+                eligibleForPromotion.Add(crew.ElementAt(i).name);
+                Debug.Log("[EarnYourStripes]: " + crew.ElementAt(i).name + " has achieved a World First and is now eligible for promotion");
+            }
+        }
+
         void StripHonours()
         {
             IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
@@ -81,26 +100,29 @@ namespace EarnYourStripes
                 double d;
                 if (MET.TryGetValue(p, out d)) MET.Remove(p);
                 d = d + v.missionTime;
-                if (!crew.ElementAt(i).veteran && recovered >= HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired && d > HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired*60*60)
-                {
-                    crew.ElementAt(i).veteran = true;
-                    promotedKerbals.Add(p);
-                    Debug.Log("[EarnYourStripes]: "+p+" has earned a promotion");
-                    StripHonours();
-                }
                 flights.Add(p, recovered);
                 MET.Add(p, d);
                 Debug.Log("[EarnYourStripes]: Processed Recovery of " + p);
-                Debug.Log("[EarnYourStripes]: "+p+" - Flights: " + recovered+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired);
-                Debug.Log("[EarnYourStripes]: " + p + " - Time Logged: " + d + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60);
-                Debug.Log("[EarnYourStripes]: "+p+" - Veteran Status: "+crew.ElementAt(i).veteran);
+                Debug.Log("[EarnYourStripes]: " + p + " - Flights: " + recovered + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired);
+                Debug.Log("[EarnYourStripes]: " + p + " - Time Logged: " + (int)d + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60);
+                Debug.Log("[EarmYourStripes]: " + p + " - World First Achieved: " + eligibleForPromotion.Contains(p));
+                Debug.Log("[EarnYourStripes]: " + p + " - Veteran Status: " + crew.ElementAt(i).veteran);
+                if (!eligibleForPromotion.Contains(p) && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) continue;
+                if (!crew.ElementAt(i).veteran && recovered >= HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired && d > HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60)
+                {
+                    crew.ElementAt(i).veteran = true;
+                    promotedKerbals.Add(p);
+                    Debug.Log("[EarnYourStripes]: " + p + " has earned a promotion");
+                    StripHonours();
+                }
             }
         }
 
         private void OnDestroy()
         {
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
-            GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
+            GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
+            GameEvents.OnProgressReached.Remove(OnProgressReached);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }

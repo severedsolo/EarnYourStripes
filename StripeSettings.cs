@@ -19,6 +19,8 @@ namespace EarnYourStripes
         public int numberOfFlightsRequired = 5;
         [GameParameters.CustomIntParameterUI("Flight Hours", toolTip = "How many hours must a Kerbal have logged to be considered a veteran?")]
         public int flightHoursRequired = 12;
+        [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
+        public bool worldFirsts = false;
     }
     class StripeSettingsClassRestrictions : GameParameters.CustomParameterNode
     {
