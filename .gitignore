@@ -55,3 +55,8 @@ obj/Debug/EarnYourStripes.pdb
 bin/Release/EarnYourStripes.pdb
 *.pdb
 *.zip
+EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.csproj.FileListAbsolute.txt
+EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.csproj.FileListAbsolute.txt
+EarnYourStripes/.vs/EarnYourStripes/v15/sqlite3/storage.ide
+*.ide
+EarnYourStripes/.vs/EarnYourStripes/v15/.suo
