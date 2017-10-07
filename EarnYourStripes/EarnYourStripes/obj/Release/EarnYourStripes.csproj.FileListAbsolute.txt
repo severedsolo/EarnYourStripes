@@ -1,0 +1,16 @@
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\EarnYourStripes.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\EarnYourStripes.pdb
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\Assembly-CSharp-firstpass.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\Assembly-CSharp.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\UnityEngine.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\KSPTrackIR.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\UnityEngine.UI.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\KSPAssets.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\Mono.Cecil.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\TDx.TDxInput.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\Mono.Security.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\UnityEngine.xml
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.csprojResolveAssemblyReference.cache
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.csproj.CoreCompileInputs.cache
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.dll
+D:\OneDrive\Documents\Github\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.pdb
