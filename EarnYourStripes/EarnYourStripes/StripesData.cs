@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EarnYourStripes
 {
-    [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT, GameScenes.TRACKSTATION)]
     class StripesData : ScenarioModule
     {
         public override void OnSave(ConfigNode node)
@@ -25,7 +25,9 @@ namespace EarnYourStripes
                 ConfigNode temp = new ConfigNode("KERBAL");
                 temp.SetValue("Name", v.Key, true);
                 temp.SetValue("Flights", v.Value, true);
-                double d;
+                double d = 0;
+                FlightTracker.instance.LaunchTime.TryGetValue(v.Key, out d);
+                temp.SetValue("LaunchTime", d, true);
                 if (FlightTracker.instance.MET.TryGetValue(v.Key, out d)) temp.SetValue("TimeLogged", d, true);
                 if (FlightTracker.instance.promotedKerbals.Contains(v.Key)) temp.SetValue("Promoted", true, true);
                 else temp.SetValue("Promoted", false, true);
@@ -47,6 +49,7 @@ namespace EarnYourStripes
             FlightTracker.instance.MET.Clear();
             FlightTracker.instance.promotedKerbals.Clear();
             FlightTracker.instance.eligibleForPromotion.Clear();
+            FlightTracker.instance.LaunchTime.Clear();
             for(int i = 0; i<loaded.Count();i++)
             {
                 ConfigNode temp = loaded.ElementAt(i);
@@ -57,6 +60,8 @@ namespace EarnYourStripes
                 double d;
                 if (Double.TryParse(temp.GetValue("TimeLogged"), out d)) FlightTracker.instance.MET.Add(s, d);
                 bool promoted;
+                Double.TryParse(temp.GetValue("LaunchTime"), out d);
+                if (d != 0) FlightTracker.instance.LaunchTime.Add(s, d);
                 if (Boolean.TryParse(temp.GetValue("Promoted"), out promoted))
                 {
                     if (promoted) FlightTracker.instance.promotedKerbals.Add(s);

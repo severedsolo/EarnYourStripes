@@ -13,6 +13,7 @@ namespace EarnYourStripes
         public static FlightTracker instance;
         public Dictionary<string, int> flights = new Dictionary<string, int>();
         public Dictionary<string, double> MET = new Dictionary<string, double>();
+        public Dictionary<string, double> LaunchTime = new Dictionary<string, double>();
         public List<string> promotedKerbals = new List<string>();
         public List<string> eligibleForPromotion = new List<string>();
 
@@ -27,12 +28,29 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Add(OnProgressReached);
+            GameEvents.onLaunch.Add(onLaunch);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
         }
 
+        private void onLaunch(EventReport data)
+        {
+            Debug.Log("[EarnYourStripes]: onLaunch fired");
+            if (FlightGlobals.ActiveVessel.GetCrewCount() == 0) return;
+            for(int i = 0; i<FlightGlobals.ActiveVessel.GetCrewCount();i++)
+            {
+                ProtoCrewMember p = FlightGlobals.ActiveVessel.GetVesselCrew().ElementAt(i);
+                if (p == null) return;
+                if (p.type == ProtoCrewMember.KerbalType.Tourist) continue;
+                LaunchTime.Remove(p.name);
+                LaunchTime.Add(p.name, Planetarium.GetUniversalTime());
+                Debug.Log("[EarnYourStripes]: Added " + p.name + " to the launch roster");
+            }
+        }
+
         private void OnProgressReached(ProgressNode data)
         {
+            Debug.Log("[EarnYourStriped]: OnProgressReached fired");
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) return;
             if (FlightGlobals.ActiveVessel == null) return;
             List<ProtoCrewMember> crew = FlightGlobals.ActiveVessel.GetVesselCrew();
@@ -81,25 +99,29 @@ namespace EarnYourStripes
         }
         private void OnGameSettingsApplied()
         {
-            Debug.Log("[EarnYourStripes]: Game Settings Updated");
+            Debug.Log("[EarnYourStripes]: OnGameSettingsApplied fired");
             StripHonours();
         }
 
         private void onVesselRecovered(ProtoVessel v, bool data1)
         {
-            Debug.Log("[EarnYourStripes]: Vessel Recovery Attempt Detected");
+            Debug.Log("[EarnYourStripes]: onVesselRecovered Fired");
             List<ProtoCrewMember> crew = v.GetVesselCrew();
             Debug.Log("[EarnYourStripes]: Processing " + crew.Count() + " Kerbals");
             if (crew.Count == 0) return;
             for (int i = 0; i < crew.Count; i++)
             {
+                if (crew.ElementAt(i).type == ProtoCrewMember.KerbalType.Tourist) continue;
                 string p = crew.ElementAt(i).name;
                 int recovered = 0;
                 if (flights.TryGetValue(p, out recovered)) flights.Remove(p);
                 recovered = recovered + 1;
-                double d;
+                double d = 0;
                 if (MET.TryGetValue(p, out d)) MET.Remove(p);
-                d = d + v.missionTime;
+                double missionTime = 0;
+                if (LaunchTime.TryGetValue(p, out missionTime)) missionTime = Planetarium.GetUniversalTime() - missionTime;
+                else missionTime = v.missionTime;
+                d = d + missionTime;
                 flights.Add(p, recovered);
                 MET.Add(p, d);
                 Debug.Log("[EarnYourStripes]: Processed Recovery of " + p);
@@ -123,6 +145,7 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Remove(OnProgressReached);
+            GameEvents.onLaunch.Remove(onLaunch);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }
