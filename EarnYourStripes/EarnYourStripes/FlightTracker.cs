@@ -28,12 +28,12 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Add(OnProgressReached);
-            GameEvents.onLaunch.Add(onLaunch);
+            GameEvents.OnVesselRollout.Add(onVesselRollout);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
         }
 
-        private void onLaunch(EventReport data)
+        private void onVesselRollout(ShipConstruct data)
         {
             Debug.Log("[EarnYourStripes]: onLaunch fired");
             if (FlightGlobals.ActiveVessel.GetCrewCount() == 0) return;
@@ -145,7 +145,7 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Remove(OnProgressReached);
-            GameEvents.onLaunch.Remove(onLaunch);
+            GameEvents.OnVesselRollout.Remove(onVesselRollout);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }

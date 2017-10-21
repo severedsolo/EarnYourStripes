@@ -29,4 +29,4 @@ C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.dll
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.pdb
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\obj\Release\EarnYourStripes.csprojResolveAssemblyReference.cache
-C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\TrackIRUnity.dll
+C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\EarnYourStripes\bin\Release\KSPTrackIR.dll
