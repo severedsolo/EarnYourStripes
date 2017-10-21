@@ -17,7 +17,7 @@ namespace EarnYourStripes
         public bool newGameOnly = false;
         [GameParameters.CustomIntParameterUI("Number of Flights", toolTip = "How many flights must a Kerbal log to be considered a veteran?")]
         public int numberOfFlightsRequired = 5;
-        [GameParameters.CustomIntParameterUI("Flight Hours", toolTip = "How many hours must a Kerbal have logged to be considered a veteran?")]
+        [GameParameters.CustomIntParameterUI("Flight Hours", toolTip = "How many hours must a Kerbal have logged to be considered a veteran?",minValue = 0,maxValue = 10000)]
         public int flightHoursRequired = 12;
         [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
         public bool worldFirsts = false;
