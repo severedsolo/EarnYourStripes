@@ -44,6 +44,8 @@ namespace EarnYourStripes
                 if (p.type == ProtoCrewMember.KerbalType.Tourist) continue;
                 LaunchTime.Remove(p.name);
                 LaunchTime.Add(p.name, Planetarium.GetUniversalTime());
+                if(!flights.TryGetValue(p.name, out int flightCount))flights.Add(p.name, 0);
+                if(!MET.TryGetValue(p.name, out double d))MET.Add(p.name, 0);
                 Debug.Log("[EarnYourStripes]: Added " + p.name + " to the launch roster");
             }
         }
@@ -106,6 +108,11 @@ namespace EarnYourStripes
         private void onVesselRecovered(ProtoVessel v, bool data1)
         {
             Debug.Log("[EarnYourStripes]: onVesselRecovered Fired");
+            if (v.missionTime == 0)
+            {
+                Debug.Log("[EarnYourStripes]: " + v.vesselName + " hasn't gone anywhere. No credit will be awarded for this flight");
+                return;
+            }
             List<ProtoCrewMember> crew = v.GetVesselCrew();
             Debug.Log("[EarnYourStripes]: Processing " + crew.Count() + " Kerbals");
             if (crew.Count == 0) return;
@@ -127,7 +134,7 @@ namespace EarnYourStripes
                 Debug.Log("[EarnYourStripes]: Processed Recovery of " + p);
                 Debug.Log("[EarnYourStripes]: " + p + " - Flights: " + recovered + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired);
                 Debug.Log("[EarnYourStripes]: " + p + " - Time Logged: " + (int)d + "/" + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60);
-                Debug.Log("[EarmYourStripes]: " + p + " - World First Achieved: " + eligibleForPromotion.Contains(p));
+                Debug.Log("[EarnYourStripes]: " + p + " - World First Achieved: " + eligibleForPromotion.Contains(p));
                 Debug.Log("[EarnYourStripes]: " + p + " - Veteran Status: " + crew.ElementAt(i).veteran);
                 if (!eligibleForPromotion.Contains(p) && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) continue;
                 if (!crew.ElementAt(i).veteran && recovered >= HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().numberOfFlightsRequired && d > HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().flightHoursRequired * 60 * 60)
