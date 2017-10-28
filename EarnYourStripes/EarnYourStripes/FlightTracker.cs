@@ -28,25 +28,29 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Add(OnProgressReached);
-            GameEvents.OnVesselRollout.Add(onVesselRollout);
+            GameEvents.OnVesselRollout.Add(OnVesselRollout);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
         }
 
-        private void onVesselRollout(ShipConstruct data)
+        private void OnVesselRollout(ShipConstruct data)
         {
-            Debug.Log("[EarnYourStripes]: onLaunch fired");
+            Debug.Log("[EarnYourStripes]: OnVesselRollout fired");
             if (FlightGlobals.ActiveVessel.GetCrewCount() == 0) return;
             for(int i = 0; i<FlightGlobals.ActiveVessel.GetCrewCount();i++)
             {
                 ProtoCrewMember p = FlightGlobals.ActiveVessel.GetVesselCrew().ElementAt(i);
                 if (p == null) return;
-                if (p.type == ProtoCrewMember.KerbalType.Tourist) continue;
+                if (p.type == ProtoCrewMember.KerbalType.Tourist)
+                {
+                    Debug.Log("[EarnYourStipes]: " + p.name + " is a tourist and not eligible for veteranhood");
+                    continue;
+                }
                 LaunchTime.Remove(p.name);
                 LaunchTime.Add(p.name, Planetarium.GetUniversalTime());
                 if(!flights.TryGetValue(p.name, out int flightCount))flights.Add(p.name, 0);
                 if(!MET.TryGetValue(p.name, out double d))MET.Add(p.name, 0);
-                Debug.Log("[EarnYourStripes]: Added " + p.name + " to the launch roster");
+                Debug.Log("[EarnYourStripes]: "+p.name+" launched at "+Planetarium.GetUniversalTime());
             }
         }
 
@@ -56,11 +60,16 @@ namespace EarnYourStripes
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) return;
             if (FlightGlobals.ActiveVessel == null) return;
             List<ProtoCrewMember> crew = FlightGlobals.ActiveVessel.GetVesselCrew();
+            Debug.Log("[EarnYourStripes]: Found " + crew.Count() + " potential candiates for World First promotion");
             if (crew.Count == 0) return;
             for(int i = 0; i<crew.Count; i++)
             {
                 if (eligibleForPromotion.Contains(crew.ElementAt(i).name)) continue;
-                if (!crew.ElementAt(i).flightLog.HasEntry(FlightLog.EntryType.Orbit)) continue;
+                if (!crew.ElementAt(i).flightLog.HasEntry(FlightLog.EntryType.Orbit))
+                {
+                    Debug.Log("[EarnYourStripes]: " + crew.ElementAt(i).name + " has not reached orbit yet and won't be given credit for this world first");
+                    continue;
+                }
                 eligibleForPromotion.Add(crew.ElementAt(i).name);
                 Debug.Log("[EarnYourStripes]: " + crew.ElementAt(i).name + " has achieved a World First and is now eligible for promotion");
             }
@@ -118,7 +127,11 @@ namespace EarnYourStripes
             if (crew.Count == 0) return;
             for (int i = 0; i < crew.Count; i++)
             {
-                if (crew.ElementAt(i).type == ProtoCrewMember.KerbalType.Tourist) continue;
+                if (crew.ElementAt(i).type == ProtoCrewMember.KerbalType.Tourist)
+                {
+                    Debug.Log("[EarnYourStipes]: " + crew.ElementAt(i).name + " is a tourist and not eligible for veteranhood");
+                    continue;
+                }
                 string p = crew.ElementAt(i).name;
                 int recovered = 0;
                 if (flights.TryGetValue(p, out recovered)) flights.Remove(p);
@@ -126,7 +139,7 @@ namespace EarnYourStripes
                 double d = 0;
                 if (MET.TryGetValue(p, out d)) MET.Remove(p);
                 double missionTime = 0;
-                if (LaunchTime.TryGetValue(p, out missionTime)) missionTime = Planetarium.GetUniversalTime() - missionTime;
+                if (LaunchTime.TryGetValue(p, out double launchTime)) missionTime = Planetarium.GetUniversalTime() - launchTime;
                 else missionTime = v.missionTime;
                 d = d + missionTime;
                 flights.Add(p, recovered);
@@ -152,7 +165,7 @@ namespace EarnYourStripes
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
             GameEvents.OnProgressReached.Remove(OnProgressReached);
-            GameEvents.OnVesselRollout.Remove(onVesselRollout);
+            GameEvents.OnVesselRollout.Remove(OnVesselRollout);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }
