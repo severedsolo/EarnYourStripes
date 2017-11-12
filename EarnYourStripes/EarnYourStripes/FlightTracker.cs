@@ -27,7 +27,7 @@ namespace EarnYourStripes
         {
             GameEvents.onVesselRecovered.Add(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
-            GameEvents.OnProgressReached.Add(OnProgressReached);
+            GameEvents.OnProgressComplete.Add(OnProgressComplete);
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
@@ -54,9 +54,9 @@ namespace EarnYourStripes
             }
         }
 
-        private void OnProgressReached(ProgressNode data)
+        private void OnProgressComplete(ProgressNode data)
         {
-            Debug.Log("[EarnYourStriped]: OnProgressReached fired");
+            Debug.Log("[EarnYourStripes]: OnProgressComplete fired");
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().worldFirsts) return;
             if (FlightGlobals.ActiveVessel == null) return;
             List<ProtoCrewMember> crew = FlightGlobals.ActiveVessel.GetVesselCrew();
@@ -164,7 +164,7 @@ namespace EarnYourStripes
         {
             GameEvents.onVesselRecovered.Remove(onVesselRecovered);
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            GameEvents.OnProgressReached.Remove(OnProgressReached);
+            GameEvents.OnProgressReached.Remove(OnProgressComplete);
             GameEvents.OnVesselRollout.Remove(OnVesselRollout);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
