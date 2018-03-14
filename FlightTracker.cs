@@ -29,8 +29,14 @@ namespace EarnYourStripes
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.OnProgressComplete.Add(OnProgressComplete);
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
+            GameEvents.onKerbalAdded.Add(OnKerbalAdded);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
+        }
+
+        private void OnKerbalAdded(ProtoCrewMember kerbal)
+        {
+            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().basicSuit) kerbal.suit = ProtoCrewMember.KerbalSuit.Vintage;
         }
 
         private void OnVesselRollout(ShipConstruct data)
@@ -82,28 +88,28 @@ namespace EarnYourStripes
             for (int i = 0; i < crew.Count(); i++)
             {
                 string p = crew.ElementAt(i).name;
-#if DEBUG
-                Debug.Log("[EarnYourStripes]: Attempting to process StripHonours for " + p);
-                Debug.Log("[EarnYourStripes]: promotedKerbals.Contains(p):" + promotedKerbals.Contains(p));
-                Debug.Log("[EarnYourStripes]: Veteran Status:" + crew.ElementAt(i).veteran);
-                Debug.Log("[EarnYourStipes]: StripHonours On: " + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours);
-#endif
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug)
+                {
+                    Debug.Log("[EarnYourStripes]: Attempting to process StripHonours for " + p);
+                    Debug.Log("[EarnYourStripes]: promotedKerbals.Contains(p):" + promotedKerbals.Contains(p));
+                    Debug.Log("[EarnYourStripes]: Veteran Status:" + crew.ElementAt(i).veteran);
+                    Debug.Log("[EarnYourStipes]: StripHonours On: " + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours);
+                }
                 if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours)
                 {
                     crew.ElementAt(i).veteran = false;
                     Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
                 }
-#if DEBUG
-                else
+                else if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug)
                 {
                     Debug.Log("[EarnYourStripes]: Failed to remove honours of " + p);
                 }
-#endif
+
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().basicSuit) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Vintage;
+
                 if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed)
                 {
-#if DEBUG
-                    Debug.Log("[EarnYourStripes]: All classes allowed");
-#endif
+                    if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug) Debug.Log("[EarnYourStripes]: All classes allowed");
                     continue;
                 }
                 switch(crew.ElementAt(i).trait)
