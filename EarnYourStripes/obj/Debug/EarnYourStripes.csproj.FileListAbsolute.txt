@@ -14,3 +14,4 @@ C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourSt
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.csproj.CopyComplete
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.dll
 C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.pdb
+C:\Users\evilp\source\repos\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.csprojResolveAssemblyReference.cache
