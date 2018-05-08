@@ -23,6 +23,8 @@ namespace EarnYourStripes
         public int flightHoursRequired = 12;
         [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
         public bool worldFirsts = false;
+        [GameParameters.CustomParameterUI("Replace Starting Crew", toolTip = "Replace the 'Big 4' with a different starting crew?")]
+        public bool generateCrew = false;
         [GameParameters.CustomParameterUI("Use Vintage Suits by default (requires Making History)?")]
         public bool basicSuit = false;
     }
