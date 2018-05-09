@@ -18,7 +18,6 @@ namespace EarnYourStripes
                 node.AddNode("EarnYourStripes");
                 cn = node.GetNode("EarnYourStripes");
             }
-            cn.SetValue("firstRun", FirstKerbaliser.instance.firstRun, true);
             if (FlightTracker.instance.flights.Count() == 0) return;
             cn.RemoveNodes("KERBAL");
             foreach (var v in FlightTracker.instance.flights)
@@ -44,7 +43,6 @@ namespace EarnYourStripes
             int counter = 0;
             ConfigNode cn = node.GetNode("EarnYourStripes");
             if (cn == null) return;
-            cn.TryGetValue("firstRun", ref FirstKerbaliser.instance.firstRun);
             ConfigNode[] loaded = cn.GetNodes("KERBAL");
             if (loaded.Count() == 0) return;
             FlightTracker.instance.flights.Clear();
