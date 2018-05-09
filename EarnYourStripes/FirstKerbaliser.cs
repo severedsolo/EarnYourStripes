@@ -27,9 +27,9 @@ namespace EarnYourStripes
         public static FirstKerbaliser instance;
         public bool firstRun = true;
         int indent = 20;
-        int numberOfKerbalsToGenerate = 4;
+        int numberOfKerbalsToGenerate = 0;
         bool showGUI = false;
-        bool randomise = true;
+        bool randomise;
         bool confirmation;
         bool nameChange;
         string nameChanging = "";
@@ -137,14 +137,9 @@ namespace EarnYourStripes
                         float.TryParse(GUILayout.TextField(p.courage.ToString()), out p.courage);
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
                         GUILayout.Label("Stupidity");
                         float.TryParse(GUILayout.TextField(p.stupidity.ToString()), out p.stupidity);
                         GUILayout.EndHorizontal();
-                        if (p.courage > 0.99) p.courage = 0.99f;
-                        if (p.stupidity > 0.99) p.stupidity = 0.99f;
-                        if (p.courage < 0.01) p.courage = 0.01f;
-                        if (p.stupidity < 0.01) p.stupidity = 0.01f;
                         GUILayout.BeginHorizontal();
                         GUILayout.Space(indent);
                         p.isBadass = GUILayout.Toggle(p.isBadass, "BadS?");
@@ -159,8 +154,6 @@ namespace EarnYourStripes
                 if (GUILayout.Button("Add new Kerbal"))
                 {
                     ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours) p.veteran = true;
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
                     HighLogic.CurrentGame.CrewRoster.AddCrewMember(p);
                     generatedKerbals.Add(p);
                 }
@@ -171,6 +164,7 @@ namespace EarnYourStripes
             {
                 GUILayout.Label("How many Kerbals do you want to start with?");
                 int.TryParse(GUILayout.TextField(numberOfKerbalsToGenerate.ToString()), out numberOfKerbalsToGenerate);
+                generatedKerbals.Clear();
             }
             if (GUILayout.Button("Done")) confirmation = true;
             GUI.DragWindow();
@@ -178,7 +172,6 @@ namespace EarnYourStripes
 
         void UpdateAllKerbals()
         {
-            if (randomise) generatedKerbals.Clear();
             List<ProtoCrewMember> kerbals = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
             for (int i = 0; i < kerbals.Count(); i++)
             {
