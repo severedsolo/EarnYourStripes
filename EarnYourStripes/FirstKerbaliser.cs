@@ -34,6 +34,11 @@ namespace EarnYourStripes
         bool nameChange;
         string nameChanging = "";
         string trait;
+        bool allowPilots = true;
+        bool allowScientists = true;
+        bool allowEngineers = true;
+        bool allowMales = true;
+        bool allowFemales = true;
         ProtoCrewMember selected;
 
         List<ProtoCrewMember> generatedKerbals = new List<ProtoCrewMember>();
@@ -58,6 +63,7 @@ namespace EarnYourStripes
                 generatedKerbals.Add(p);
             }
             showGUI = true;
+            Debug.Log("[EarnYourStripes]: FirstKerbaliser: Awake");
         }
 
         public void OnGUI()
@@ -75,6 +81,7 @@ namespace EarnYourStripes
                     showGUI = false;
                     UpdateAllKerbals();
                     firstRun = false;
+                    Debug.Log("[EarnYourStripes]: Initial Crew Changes committed");
                 }
                 if (GUILayout.Button("No"))
                 {
@@ -93,6 +100,7 @@ namespace EarnYourStripes
                     {
                         if (selected != p) selected = p;
                         else selected = null;
+                        Debug.Log("[EarnYourStripes]: " + p.name + " selected for editing");
                     }
                     if (selected == p)
                     {
@@ -102,6 +110,7 @@ namespace EarnYourStripes
                         {
                             nameChange = true;
                             nameChanging = p.name;
+                            Debug.Log("[EarnYourStripes]: Changing name of " + p.name);
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
@@ -110,7 +119,11 @@ namespace EarnYourStripes
                         {
                             nameChanging = GUILayout.TextField(nameChanging);
                             p.ChangeName(nameChanging);
-                            if (GUILayout.Button("Save")) nameChange = false;
+                            if (GUILayout.Button("Save"))
+                            {
+                                nameChange = false;
+                                Debug.Log("[EarnYourStripes]: Commited name change to " + p.name);
+                            }
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
@@ -119,6 +132,7 @@ namespace EarnYourStripes
                         {
                             if (p.gender == ProtoCrewMember.Gender.Male) p.gender = ProtoCrewMember.Gender.Female;
                             else p.gender = ProtoCrewMember.Gender.Male;
+                            Debug.Log("[EarnYourStripes]: " + p.name + " gender changed to " + p.gender);
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
@@ -129,6 +143,7 @@ namespace EarnYourStripes
                             if (p.trait == "Scientist") trait = "Engineer";
                             if (p.trait == "Engineer") trait = "Pilot";
                             KerbalRoster.SetExperienceTrait(p, trait);
+                            Debug.Log("[EarnYourStripes]: " + p.name + " class changed to " + p.trait);
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
@@ -151,7 +166,11 @@ namespace EarnYourStripes
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
                         GUILayout.Space(indent);
-                        if (GUILayout.Button("Remove Kerbal")) generatedKerbals.Remove(p);
+                        if (GUILayout.Button("Remove Kerbal"))
+                        {
+                            Debug.Log("[EarnYourStripes]: Deleting " + p.name);
+                            generatedKerbals.Remove(p);
+                        }
                         GUILayout.EndHorizontal();
                     }
                 }
@@ -163,6 +182,7 @@ namespace EarnYourStripes
                     if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
                     HighLogic.CurrentGame.CrewRoster.AddCrewMember(p);
                     generatedKerbals.Add(p);
+                    Debug.Log("[EarnYourStripes]: New Kerbal added: " + p.name);
                 }
                 GUILayout.Space(indent);
                 GUILayout.EndVertical();
@@ -171,6 +191,11 @@ namespace EarnYourStripes
             {
                 GUILayout.Label("How many Kerbals do you want to start with?");
                 int.TryParse(GUILayout.TextField(numberOfKerbalsToGenerate.ToString()), out numberOfKerbalsToGenerate);
+                allowMales = GUILayout.Toggle(allowMales, "Generate Male Kerbals");
+                allowFemales = GUILayout.Toggle(allowFemales, "Generate Female Kerbals");
+                allowPilots = GUILayout.Toggle(allowPilots, "Generate Pilots");
+                allowScientists = GUILayout.Toggle(allowScientists, "Generate Scientists");
+                allowEngineers = GUILayout.Toggle(allowEngineers, "Generate Engineers");
             }
             if (GUILayout.Button("Done")) confirmation = true;
             GUI.DragWindow();
@@ -194,17 +219,33 @@ namespace EarnYourStripes
                         break;
                     }
                 }
-                if (!found) HighLogic.CurrentGame.CrewRoster.Remove(p);
+                if (!found)
+                {
+                    Debug.Log("[EarnYourStripes]: " + p.name + " not selected with initial crew. Removing");
+                    HighLogic.CurrentGame.CrewRoster.Remove(p);
+                }
             }
             if (randomise)
             {
                 int i = 0;
+                Debug.Log("[EarnYourStripes]: Running Random Crew Generator");
+                Debug.Log("[EarnYourStripes]: allowMales: " + allowMales + " allowFemales: " + allowFemales + " allowPilots: " + allowPilots + " allowScientists: " + allowScientists + " allowEngineers: " + allowEngineers);
                 while (i < numberOfKerbalsToGenerate)
                 {
                     ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
                     if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours) p.veteran = true;
                     if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
-                    i++;
+                    if (!allowMales && p.gender == ProtoCrewMember.Gender.Male) HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (!allowFemales && p.gender == ProtoCrewMember.Gender.Female) HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (!allowEngineers && p.trait == "Engineer") HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (!allowScientists && p.trait == "Scientist") HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (!allowPilots && p.trait == "Pilot") HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else
+                    {
+                        Debug.Log("[EarnYourStripes]: " + p.name + " selected randomly for initial crew");
+                        Debug.Log("[EarnYourStripes]: " + p.trait + ", " + p.gender);
+                        i++;
+                    }
                 }
             }
         }
