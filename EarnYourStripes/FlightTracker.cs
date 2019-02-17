@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.IO;
+using KSP.UI;
 
 namespace EarnYourStripes
 {
@@ -16,6 +17,10 @@ namespace EarnYourStripes
         public Dictionary<string, double> LaunchTime = new Dictionary<string, double>();
         public List<string> promotedKerbals = new List<string>();
         public List<string> eligibleForPromotion = new List<string>();
+        bool astronautComplexSpawned = false;
+        private int UPDATE_CNT = 5;
+        private bool updateLabelOnce = true;
+        private int updateCnt = 5;
 
         private void Awake()
         {
@@ -29,9 +34,23 @@ namespace EarnYourStripes
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.OnProgressComplete.Add(OnProgressComplete);
             GameEvents.OnVesselRollout.Add(OnVesselRollout);
-            GameEvents.onKerbalAdded.Add(OnKerbalAdded);
+            GameEvents.onKerbalAddComplete.Add(OnKerbalAdded);
+            GameEvents.onGUIAstronautComplexSpawn.Add(AstronautComplexSpawned);
+            GameEvents.onGUIAstronautComplexDespawn.Add(AstronautComplexDespawned);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
             StripHonours();
+        }
+
+        private void AstronautComplexDespawned()
+        {
+            astronautComplexSpawned = false;
+            updateCnt = UPDATE_CNT;
+            updateLabelOnce = true;
+        }
+
+        private void AstronautComplexSpawned()
+        {
+            astronautComplexSpawned = true;
         }
 
         private void OnKerbalAdded(ProtoCrewMember kerbal)
@@ -58,6 +77,37 @@ namespace EarnYourStripes
                 if(!MET.TryGetValue(p.name, out double d))MET.Add(p.name, 0);
                 Debug.Log("[EarnYourStripes]: "+p.name+" launched at "+Planetarium.GetUniversalTime());
             }
+        }
+        void LateUpdate()
+        {
+            if (astronautComplexSpawned && updateLabelOnce)
+            {
+                if (updateCnt-- <= 0) updateLabelOnce = false;
+                Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex");
+                IEnumerable<CrewListItem> crewItemContainers = FindObjectsOfType<CrewListItem>().Where(x => x.GetCrewRef().rosterStatus == ProtoCrewMember.RosterStatus.Available);
+                CrewListItem crewContainer;
+                for (int i = 0; i < crewItemContainers.Count(); i++)
+                {
+                    crewContainer = crewItemContainers.ElementAt(i);
+                    if(crewContainer.GetCrewRef().type == ProtoCrewMember.KerbalType.Applicant) continue;
+                    string kerbalName = crewContainer.GetName();
+                    flights.TryGetValue(kerbalName, out int numberOfFlights);
+                    MET.TryGetValue(kerbalName, out double flightTime);
+                    string timeString = ConvertUtToString(flightTime);
+                    if (!updateLabelOnce) crewContainer.SetName(kerbalName + " (" + timeString +" hrs)");
+                }
+            }
+        }
+
+        private string ConvertUtToString(double time)
+        {
+            time = time / 60 / 60;
+            time = (int)Math.Floor(time);
+            string timeString = time.ToString();
+            int stringLength = timeString.Count() - 3;
+            if (time.ToString().Count() > 4) timeString = timeString.Substring(0, stringLength)+"k";
+            else timeString = time.ToString();
+            return timeString;
         }
 
         private void OnProgressComplete(ProgressNode data)
