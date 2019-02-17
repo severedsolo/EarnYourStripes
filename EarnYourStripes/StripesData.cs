@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using FlightTracker;
 
 namespace EarnYourStripes
 {
@@ -19,21 +20,11 @@ namespace EarnYourStripes
                 cn = node.GetNode("EarnYourStripes");
             }
             cn.SetValue("firstRun", FirstKerbaliser.instance.firstRun, true);
-            if (FlightTracker.instance.flights.Count() == 0) return;
-            cn.RemoveNodes("KERBAL");
-            foreach (var v in FlightTracker.instance.flights)
+            cn.RemoveNodes("PROMOTED_KERBAL");
+            for(int i = 0; i<EarnYourStripes.instance.promotedKerbals.Count(); i++)
             {
-                ConfigNode temp = new ConfigNode("KERBAL");
-                temp.SetValue("Name", v.Key, true);
-                temp.SetValue("Flights", v.Value, true);
-                double d = 0;
-                FlightTracker.instance.LaunchTime.TryGetValue(v.Key, out d);
-                temp.SetValue("LaunchTime", d, true);
-                if (FlightTracker.instance.MET.TryGetValue(v.Key, out d)) temp.SetValue("TimeLogged", d, true);
-                if (FlightTracker.instance.promotedKerbals.Contains(v.Key)) temp.SetValue("Promoted", true, true);
-                else temp.SetValue("Promoted", false, true);
-                if (FlightTracker.instance.eligibleForPromotion.Contains(v.Key)) temp.SetValue("WorldFirst", true, true);
-                else temp.SetValue("WorldFirst", false, true);
+                ConfigNode temp = new ConfigNode("PROMOTED_KERBAL");
+                temp.SetValue("Name", EarnYourStripes.instance.promotedKerbals.ElementAt(i));
                 cn.AddNode(temp);
                 counter++;
             }
@@ -45,33 +36,25 @@ namespace EarnYourStripes
             ConfigNode cn = node.GetNode("EarnYourStripes");
             if (cn == null) return;
             cn.TryGetValue("firstRun", ref FirstKerbaliser.instance.firstRun);
-            ConfigNode[] loaded = cn.GetNodes("KERBAL");
-            if (loaded.Count() == 0) return;
-            FlightTracker.instance.flights.Clear();
-            FlightTracker.instance.MET.Clear();
-            FlightTracker.instance.promotedKerbals.Clear();
-            FlightTracker.instance.eligibleForPromotion.Clear();
-            FlightTracker.instance.LaunchTime.Clear();
+            ConfigNode[] loaded = cn.GetNodes("PROMOTED_KERBAL");
+            //Upgrade path from StripesData to FlightTrackerScenario
+            if (loaded.Count() == 0)
+            {
+                loaded = cn.GetNodes("KERBAL");
+                if (loaded.Count() == 0) return;
+                else ActiveFlightTracker.instance.EarnYourStripesUpgradePath(cn);
+                foreach (ProtoCrewMember p in HighLogic.CurrentGame.CrewRoster.Crew)
+                {
+                    EarnYourStripes.instance.FlightTrackerUpdated(p);
+                }
+                return;
+            }
+            EarnYourStripes.instance.promotedKerbals.Clear();
             for(int i = 0; i<loaded.Count();i++)
             {
                 ConfigNode temp = loaded.ElementAt(i);
                 string s = temp.GetValue("Name");
-                if (s == null) continue;
-                int t;
-                if (Int32.TryParse(temp.GetValue("Flights"), out t)) FlightTracker.instance.flights.Add(s, t);
-                double d;
-                if (Double.TryParse(temp.GetValue("TimeLogged"), out d)) FlightTracker.instance.MET.Add(s, d);
-                bool promoted;
-                Double.TryParse(temp.GetValue("LaunchTime"), out d);
-                if (d != 0) FlightTracker.instance.LaunchTime.Add(s, d);
-                if (Boolean.TryParse(temp.GetValue("Promoted"), out promoted))
-                {
-                    if (promoted) FlightTracker.instance.promotedKerbals.Add(s);
-                }
-                if (Boolean.TryParse(temp.GetValue("WorldFirst"), out promoted))
-                {
-                    if (promoted) FlightTracker.instance.eligibleForPromotion.Add(s);
-                }
+                EarnYourStripes.instance.promotedKerbals.Add(s);
                 counter++;
             }
             Debug.Log("[EarnYourStripes]: Loaded " + counter + " kerbals flight data");
