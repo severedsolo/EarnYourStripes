@@ -111,6 +111,7 @@ namespace EarnYourStripes
             {
                 promotedKerbals.Add(p.name);
                 p.veteran = true;
+                Debug.Log("[EarnYourStripes]: Promoting " + p.name);
             }
         }
 

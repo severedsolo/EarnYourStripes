@@ -17,7 +17,6 @@ namespace EarnYourStripes
         void Start()
         {
             GameEvents.onGUIAstronautComplexSpawn.Add(AstronautComplexSpawned);
-            GameEvents.onGUILaunchScreenSpawn.Add(onGUISpawn);
             GameEvents.onGUIAstronautComplexDespawn.Add(AstronautComplexDespawned);
             Debug.Log("[EarnYourStripes]: AstronautComplexHandler has registered events");
         }

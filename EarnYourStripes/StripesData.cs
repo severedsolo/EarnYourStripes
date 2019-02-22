@@ -24,7 +24,7 @@ namespace EarnYourStripes
             for(int i = 0; i<EarnYourStripes.instance.promotedKerbals.Count(); i++)
             {
                 ConfigNode temp = new ConfigNode("PROMOTED_KERBAL");
-                temp.SetValue("Name", EarnYourStripes.instance.promotedKerbals.ElementAt(i));
+                temp.SetValue("Name", EarnYourStripes.instance.promotedKerbals.ElementAt(i), true);
                 cn.AddNode(temp);
                 counter++;
             }
