@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Experience;
 using UnityEngine;
 
 namespace EarnYourStripes
@@ -40,6 +41,8 @@ namespace EarnYourStripes
         bool allowMales = true;
         bool allowFemales = true;
         ProtoCrewMember selected;
+        List<string> availableTraits = new List<string>();
+        List<string> disallowedTraits = new List<string>();
 
         List<ProtoCrewMember> generatedKerbals = new List<ProtoCrewMember>();
 
@@ -62,8 +65,14 @@ namespace EarnYourStripes
                 if (p.rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
                 generatedKerbals.Add(p);
             }
+            ConfigNode[] experienceTraits = GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT");
+            for (int i = 0; i < experienceTraits.Count(); i++)
+            {
+                ConfigNode cn = experienceTraits.ElementAt(i);
+                availableTraits.Add(cn.GetValue("title"));
+            }
             showGUI = true;
-            Debug.Log("[EarnYourStripes]: FirstKerbaliser: Awake");
+            Debug.Log("[EarnYourStripes]: FirstKerbaliser: Start");
         }
 
         public void OnGUI()
@@ -139,9 +148,9 @@ namespace EarnYourStripes
                         GUILayout.Space(indent);
                         if (GUILayout.Button("Class: " + p.GetLocalizedTrait()))
                         {
-                            if (p.trait == "Pilot") trait = "Scientist";
-                            if (p.trait == "Scientist") trait = "Engineer";
-                            if (p.trait == "Engineer") trait = "Pilot";
+                            int index = FindIndex(p.trait);
+                            if (index > availableTraits.Count - 1) index = 0;
+                            trait = availableTraits.ElementAt(index);
                             KerbalRoster.SetExperienceTrait(p, trait);
                             Debug.Log("[EarnYourStripes]: " + p.name + " class changed to " + p.trait);
                         }
@@ -190,15 +199,53 @@ namespace EarnYourStripes
             else
             {
                 GUILayout.Label("How many Kerbals do you want to start with?");
+                string buttonString = string.Empty;
                 int.TryParse(GUILayout.TextField(numberOfKerbalsToGenerate.ToString()), out numberOfKerbalsToGenerate);
-                allowMales = GUILayout.Toggle(allowMales, "Generate Male Kerbals");
-                allowFemales = GUILayout.Toggle(allowFemales, "Generate Female Kerbals");
-                allowPilots = GUILayout.Toggle(allowPilots, "Generate Pilots");
-                allowScientists = GUILayout.Toggle(allowScientists, "Generate Scientists");
-                allowEngineers = GUILayout.Toggle(allowEngineers, "Generate Engineers");
+                if (disallowedTraits.Contains("Male")) buttonString = "Males: Not Allowed";
+                else buttonString = "Males: Allowed";
+                if (GUILayout.Button(buttonString))
+                {
+                    if (disallowedTraits.Contains("Male")) disallowedTraits.Remove("Male");
+                    else disallowedTraits.Add("Male");
+                }
+                if (disallowedTraits.Contains("Female")) buttonString = "Females: Not Allowed";
+                else buttonString = "Males: Allowed";
+                if (GUILayout.Button(buttonString))
+                {
+                    if (disallowedTraits.Contains("Female")) disallowedTraits.Remove("Female");
+                    else disallowedTraits.Add("Female");
+                }
+                for (int i = 0; i < availableTraits.Count(); i++)
+                {
+                    string selectedTrait = availableTraits.ElementAt(i);
+                    if (selectedTrait == "Tourist") continue;
+                    if (disallowedTraits.Contains(selectedTrait))
+                    {
+                        buttonString = selectedTrait + ": Not Allowed";
+                    }
+                    else
+                    {
+                        buttonString = selectedTrait + ": Allowed";
+                    }
+                    if (GUILayout.Button(buttonString))
+                    {
+                        if (disallowedTraits.Contains(selectedTrait)) disallowedTraits.Remove(selectedTrait);
+                        else disallowedTraits.Add(selectedTrait);
+                    }
+                }
             }
             if (GUILayout.Button("Done")) confirmation = true;
             GUI.DragWindow();
+        }
+
+        private int FindIndex(string kerbalTrait)
+        {
+            for (int i = 0; i < availableTraits.Count(); i++)
+            {
+                string s = availableTraits.ElementAt(i);
+                if (s == kerbalTrait) return i+1;
+            }
+            return -1;
         }
 
         void UpdateAllKerbals()
@@ -235,11 +282,9 @@ namespace EarnYourStripes
                     ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
                     if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours) p.veteran = true;
                     if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
-                    if (!allowMales && p.gender == ProtoCrewMember.Gender.Male) HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (!allowFemales && p.gender == ProtoCrewMember.Gender.Female) HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (!allowEngineers && p.trait == "Engineer") HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (!allowScientists && p.trait == "Scientist") HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (!allowPilots && p.trait == "Pilot") HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    if (disallowedTraits.Contains("Male") && p.gender == ProtoCrewMember.Gender.Male) HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (disallowedTraits.Contains("Female") && p.gender == ProtoCrewMember.Gender.Female) HighLogic.CurrentGame.CrewRoster.Remove(p);
+                    else if (disallowedTraits.Contains(p.trait)) HighLogic.CurrentGame.CrewRoster.Remove(p);
                     else
                     {
                         Debug.Log("[EarnYourStripes]: " + p.name + " selected randomly for initial crew");
