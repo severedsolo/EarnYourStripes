@@ -71,6 +71,12 @@ namespace EarnYourStripes
                 ConfigNode cn = experienceTraits.ElementAt(i);
                 availableTraits.Add(cn.GetValue("title"));
             }
+#if DEBUG
+            for (int i = 0; i < experienceTraits.Count(); i++)
+            {
+                Debug.Log("[EarnYourStripes]: Entry " + i + ": " + availableTraits.ElementAt(i));
+            }
+#endif
             showGUI = true;
             Debug.Log("[EarnYourStripes]: FirstKerbaliser: Start");
         }
@@ -146,7 +152,9 @@ namespace EarnYourStripes
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
                         GUILayout.Space(indent);
-                        if (GUILayout.Button("Class: " + p.GetLocalizedTrait()))
+                        string traitName = p.GetLocalizedTrait();
+                        if (traitName == "Kerbal") traitName = p.trait;
+                        if (GUILayout.Button("Class: " + traitName))
                         {
                             int index = FindIndex(p.trait);
                             if (index > availableTraits.Count - 1) index = 0;
@@ -209,7 +217,7 @@ namespace EarnYourStripes
                     else disallowedTraits.Add("Male");
                 }
                 if (disallowedTraits.Contains("Female")) buttonString = "Females: Not Allowed";
-                else buttonString = "Males: Allowed";
+                else buttonString = "Females: Allowed";
                 if (GUILayout.Button(buttonString))
                 {
                     if (disallowedTraits.Contains("Female")) disallowedTraits.Remove("Female");
@@ -243,7 +251,18 @@ namespace EarnYourStripes
             for (int i = 0; i < availableTraits.Count(); i++)
             {
                 string s = availableTraits.ElementAt(i);
-                if (s == kerbalTrait) return i+1;
+                if (s == kerbalTrait)
+                {
+                    try
+                    {
+                        if (availableTraits.ElementAt(i + 1) == "Tourist") return i + 2;
+                    }
+                    catch
+                    {
+                        return 0;
+                    }
+                    return i + 1;
+                }
             }
             return -1;
         }
