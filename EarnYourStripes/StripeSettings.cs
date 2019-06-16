@@ -27,6 +27,8 @@ namespace EarnYourStripes
         public bool generateCrew = false;
         [GameParameters.CustomParameterUI("Use Vintage Suits by default (requires Making History)?")]
         public bool basicSuit = false;
+        [GameParameters.CustomParameterUI("Give Veterans their own suits (requires Breaking Ground)?")]
+        public bool bgSuits = true;
     }
     class StripeSettingsClassRestrictions : GameParameters.CustomParameterNode
     {

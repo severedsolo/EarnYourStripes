@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using FlightTracker;
 using System;
+using Expansions;
 
 namespace EarnYourStripes
 {
@@ -59,7 +60,6 @@ namespace EarnYourStripes
                 }
 
                 if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().basicSuit) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Vintage;
-
                 if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed)
                 {
                     if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug) Debug.Log("[EarnYourStripes]: All classes allowed");
@@ -93,6 +93,17 @@ namespace EarnYourStripes
                         break;
                 }
             }
+            UpdateSuits();
+        }
+
+        private void UpdateSuits()
+        {
+            IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
+            if (crew.Count() == 0) return;
+            for (int i = 0; i < crew.Count(); i++)
+            {
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().bgSuits && crew.ElementAt(i).veteran) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Future;
+            }
         }
         private void OnGameSettingsApplied()
         {
@@ -107,19 +118,36 @@ namespace EarnYourStripes
             int flights = ActiveFlightTracker.instance.GetNumberOfFlights(p.name);
             double met = ActiveFlightTracker.instance.GetRecordedMissionTimeHours(p.name);
             int worldFirsts = ActiveFlightTracker.instance.GetNumberOfWorldFirsts(p.name);
+            Debug.Log("[EarnYourStripes]: Evaluating "+p.name+"'s chances of promotion");
             if (!promotedKerbals.Contains(p.name) && EligibleForPromotion(flights, met, worldFirsts))
             {
                 promotedKerbals.Add(p.name);
                 p.veteran = true;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().bgSuits && p.veteran) p.suit = ProtoCrewMember.KerbalSuit.Future;
                 Debug.Log("[EarnYourStripes]: Promoting " + p.name);
             }
+            UpdateSuits();
         }
 
         private bool EligibleForPromotion(int flights, double met, int worldFirsts)
         {
-            if (flights < settings.numberOfFlightsRequired) return false;
-            if (met < settings.flightHoursRequired) return false;
-            if (worldFirsts < 1 && settings.worldFirsts) return false;
+            if (flights < settings.numberOfFlightsRequired)
+            {
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+settings.numberOfFlightsRequired);
+                return false;
+            }
+
+            if (met < settings.flightHoursRequired)
+            {
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+settings.flightHoursRequired);
+                return false;
+            }
+
+            if (worldFirsts < 1 && settings.worldFirsts)
+            {
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
+                return false;
+            }
             return true;
         }
 
