@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-// ReSharper disable ClassNeverInstantiated.Global
-#pragma warning disable 414
 
 namespace EarnYourStripes
 {

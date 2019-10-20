@@ -12,14 +12,12 @@ namespace EarnYourStripes
     {
         public static EarnYourStripes Instance;
         public List<string> promotedKerbals = new List<string>();
-        private StripeSettings _settings;
         public bool firstRun = true;
 
         private void Awake()
         {
             Instance = this;
             DontDestroyOnLoad(this);
-            _settings = HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>();
             Debug.Log("[EarnYourStripes]: Earn Your Stripes is Awake");
         }
         private void Start()
@@ -132,19 +130,19 @@ namespace EarnYourStripes
 
         private bool EligibleForPromotion(int flights, double met, int worldFirsts)
         {
-            if (flights < _settings.NumberOfFlightsRequired)
+            if (flights < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+_settings.NumberOfFlightsRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired);
                 return false;
             }
 
-            if (met < _settings.FlightHoursRequired)
+            if (met < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+_settings.FlightHoursRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired);
                 return false;
             }
 
-            if (worldFirsts < 1 && _settings.WorldFirsts)
+            if (worldFirsts < 1 && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts)
             {
                 Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
                 return false;
@@ -155,6 +153,7 @@ namespace EarnYourStripes
         private void OnDestroy()
         {
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
+            GameEvents.onKerbalAddComplete.Remove(OnKerbalAdded);
             if (ActiveFlightTracker.onFlightTrackerUpdated != null) ActiveFlightTracker.onFlightTrackerUpdated.Remove(FlightTrackerUpdated);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
