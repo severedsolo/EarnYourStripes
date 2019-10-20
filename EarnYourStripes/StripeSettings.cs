@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+// ReSharper disable ClassNeverInstantiated.Global
+#pragma warning disable 414
 
 namespace EarnYourStripes
 {
-    class StripeSettings : GameParameters.CustomParameterNode
+    internal class StripeSettings : GameParameters.CustomParameterNode
     {
         public override string Title { get { return "EarnYourStripes Options"; } }
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
@@ -13,24 +15,25 @@ namespace EarnYourStripes
         public override string DisplaySection { get { return Section; } }
         public override int SectionOrder { get { return 1; } }
         public override bool HasPresets { get { return false; } }
-        public bool autoPersistance = true;
-        public bool newGameOnly = false;
+        public bool AutoPersistance = true;
+        public bool NewGameOnly = false;
         [GameParameters.CustomParameterUI("Enable Debug Mode")]
-        public bool debug = false;
+        public bool Debug = false;
         [GameParameters.CustomIntParameterUI("Number of Flights", toolTip = "How many flights must a Kerbal log to be considered a veteran?")]
-        public int numberOfFlightsRequired = 5;
+        public int NumberOfFlightsRequired = 5;
         [GameParameters.CustomIntParameterUI("Flight Hours", toolTip = "How many hours must a Kerbal have logged to be considered a veteran?", minValue = 0, maxValue = 10000)]
-        public int flightHoursRequired = 12;
+        public int FlightHoursRequired = 12;
         [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
-        public bool worldFirsts = false;
+        public bool WorldFirsts = false;
         [GameParameters.CustomParameterUI("Replace Starting Crew", toolTip = "Replace the 'Big 4' with a different starting crew?")]
-        public bool generateCrew = false;
+        public bool GenerateCrew = false;
         [GameParameters.CustomParameterUI("Use Vintage Suits by default (requires Making History)?")]
-        public bool basicSuit = false;
+        public bool BasicSuit = false;
         [GameParameters.CustomParameterUI("Give Veterans their own suits (requires Breaking Ground)?")]
-        public bool bgSuits = true;
+        public bool BgSuits = true;
     }
-    class StripeSettingsClassRestrictions : GameParameters.CustomParameterNode
+
+    internal class StripeSettingsClassRestrictions : GameParameters.CustomParameterNode
     {
         public override string Title { get { return "Class Restrictions"; } }
         public override string Section { get { return "EarnYourStripes"; } }
@@ -39,12 +42,12 @@ namespace EarnYourStripes
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
         public override bool HasPresets { get { return false; } }
         [GameParameters.CustomParameterUI("Remove Existing Honours?", toolTip = "Remove Honours from the Big 4 if they haven't earned it")]
-        public bool removeExistingHonours = false;
+        public bool RemoveExistingHonours = false;
         [GameParameters.CustomParameterUI("Allow Pilot Veterans")]
-        public bool pilotsAllowed = true;
+        public bool PilotsAllowed = true;
         [GameParameters.CustomParameterUI("Allow Scientist Veterans")]
-        public bool scientistsAllowed = true;
+        public bool ScientistsAllowed = true;
         [GameParameters.CustomParameterUI("Allow Engineer Veterans")]
-        public bool engineersAllowed = true;
+        public bool EngineersAllowed = true;
     }
 }

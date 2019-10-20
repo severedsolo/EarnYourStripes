@@ -33,14 +33,7 @@ D:/OneDrive/Documents/Github/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourS
 D:/OneDrive/Documents/Github/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.pdb
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/EarnYourStripes.dll
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/EarnYourStripes.pdb
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/KSPTrackIR.dll
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/KSPAssets.dll
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/Mono.Cecil.dll
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/Ionic.Zip.dll
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/UnityEngine.dll.mdb
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.csprojAssemblyReference.cache
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.csproj.CoreCompileInputs.cache
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.csproj.CopyComplete
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.dll
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.pdb
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Debug/EarnYourStripes.dll

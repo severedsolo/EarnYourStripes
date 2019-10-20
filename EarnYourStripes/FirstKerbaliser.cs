@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,311 +8,137 @@ using UnityEngine;
 
 namespace EarnYourStripes
 {
-    [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
-    class FirstRunSpaceCentreLoader : FirstKerbaliser
+    [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
+    internal class FirstKerbaliser : MonoBehaviour
     {
+        private PopupDialog _uidialog;
+        private bool _uiWaitEnforced = false;
+        private UiUtilities _ui;
+        private Dictionary<string, bool> _availableAllowedTraits = new Dictionary<string, bool>();
+        private bool _allowFemales;
+        private bool _allowMales;
 
-    }
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class FirstRunFlightLoader : FirstKerbaliser
-    {
-
-    }
-    [KSPAddon(KSPAddon.Startup.TrackingStation, false)]
-    class FirstRunTrackingStationLoader : FirstKerbaliser
-    {
-
-    }
-
-    class FirstKerbaliser : MonoBehaviour
-    {
-        public static FirstKerbaliser instance;
-        public bool firstRun = true;
-        int indent = 20;
-        int numberOfKerbalsToGenerate = 4;
-        bool showGUI = false;
-        bool randomise = true;
-        bool confirmation;
-        bool nameChange;
-        string nameChanging = "";
-        string trait;
-        bool allowPilots = true;
-        bool allowScientists = true;
-        bool allowEngineers = true;
-        bool allowMales = true;
-        bool allowFemales = true;
-        ProtoCrewMember selected;
-        List<string> availableTraits = new List<string>();
-        List<string> disallowedTraits = new List<string>();
-
-        List<ProtoCrewMember> generatedKerbals = new List<ProtoCrewMember>();
-
-        Rect Window = new Rect(20, 100, 240, 50);
-
-
-        void Awake()
+        private void Start()
         {
-            instance = this;
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().GenerateCrew) return;
+            if (!EarnYourStripes.Instance.firstRun) return;
+            _ui = new UiUtilities();
+            _uidialog = FirstDialog();
         }
 
-        void Start()
+        private PopupDialog FirstDialog()
         {
-            if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().generateCrew) return;
-            if (!firstRun) return;
-            IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
-            for (int i = 0; i < crew.Count(); i++)
+            List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
+            dialogElements.Add(new DialogGUILabel("Looks like you are starting a new game. Want to customise your Kerbals?", _ui.Header()));
+            DialogGUIBase[] horizontal = new DialogGUIBase[2];
+            horizontal[0] = new DialogGUIButton("Yes", () => SwitchDialog("randomQuestion"), true);
+            horizontal[1] = new DialogGUIButton("No", () => _uidialog.Dismiss(), false);
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("FirstKerbaliserFirst", "", "Earn Your Stripes", UISkinManager.defaultSkin,
+                    new Rect(0.5f, 0.5f, 200, 100), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
+        }
+
+        private PopupDialog RandomQuestionDialog()
+        {
+            SwitchUiWait();
+            List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
+            dialogElements.Add(new DialogGUILabel("Great! Do you want Random Kerbals or to customise them yourself?", _ui.Header()));
+            DialogGUIBase[] horizontal = new DialogGUIBase[3];
+            horizontal[0] = new DialogGUIButton("Random Kerbals", () => SwitchDialog("randomKerbals"), true);
+            horizontal[1] = new DialogGUIButton("Customise Them Myself", () => SwitchDialog("customKerbals"), true);
+            horizontal[2] = new DialogGUIButton("Actually I changed my mind", () => _uidialog.Dismiss(), false);
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("FirstKerbaliserRandomQuestion", "", "Earn Your Stripes", UISkinManager.defaultSkin,
+                    new Rect(0.5f, 0.5f, 200, 100), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
+        }
+
+        private PopupDialog RandomKerbalDialog()
+        {
+            SwitchUiWait();
+            List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
+            int numberOfRandomKerbals = 4;
+            dialogElements.Add(new DialogGUITextInput("Number of Kerbals", false, 2, s =>
             {
-                ProtoCrewMember p = crew.ElementAt(i);
-                if (p.rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
-                generatedKerbals.Add(p);
+                numberOfRandomKerbals = Convert.ToInt32(s);
+                return Convert.ToString(numberOfRandomKerbals);
+            }));
+            _availableAllowedTraits = GetAvailableTraits();
+            DialogGUIBase[] horizontal = new DialogGUIBase[2];
+            horizontal[0] = new DialogGUIToggle(_allowFemales, "Allow Female Kerbals", b => _allowFemales = b);
+            horizontal[1] = new DialogGUIToggle(_allowMales, "Allow Male Kerbals", b => _allowMales = b);
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            horizontal = new DialogGUIBase[_availableAllowedTraits.Count];
+            for (int i = 0; i < _availableAllowedTraits.Count; i++)
+            {
+                string s = _availableAllowedTraits.ElementAt(i).Key;
+                horizontal[i] = new DialogGUIToggle(_availableAllowedTraits.ElementAt(i).Value, "Allow: " + s, b => { _availableAllowedTraits[s] = b; });
             }
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            horizontal = new DialogGUIBase[2];
+            horizontal[0] = new DialogGUIButton("I'm Done", () => GenerateRandomKerbals(numberOfRandomKerbals)); 
+            horizontal[1] = new DialogGUIButton("I changed my mind. Customise my Kerbals", () => SwitchDialog("customKerbals"), true);
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("FirstKerbaliserRandomKerbals", "", "Earn Your Stripes", UISkinManager.defaultSkin,
+                    new Rect(0.5f, 0.5f, 200, 100), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
+        }
+
+        private PopupDialog CustomKerbalDialog()
+        {
+            throw new NotImplementedException();
+        }
+
+        private PopupDialog BrokenDialog()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SwitchDialog(string reason)
+        {
+            if (!_uiWaitEnforced)
+            {
+                Invoke(nameof(SwitchDialog), 0.5f);
+                SwitchUiWait();
+                return;
+            }
+
+            switch (reason)
+            {
+                case "randomQuestion":
+                    _uidialog = RandomQuestionDialog();
+                    break;
+                case "randomKerbals":
+                    _uidialog = RandomKerbalDialog();
+                    break;
+                case "customKerbals":
+                    _uidialog = CustomKerbalDialog();
+                    break;
+                default:
+                    _uidialog = BrokenDialog();
+                    break;
+            }
+        }
+
+        private void SwitchUiWait()
+        {
+            _uiWaitEnforced = !_uiWaitEnforced;
+        }
+
+        private void GenerateRandomKerbals(int numberOfRandomKerbals)
+        {
+            throw new NotImplementedException();
+        }
+        private static Dictionary<string, bool> GetAvailableTraits()
+        {
             ConfigNode[] experienceTraits = GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT");
+            Dictionary<string, bool> traitTitles = new Dictionary<string, bool>();
             for (int i = 0; i < experienceTraits.Count(); i++)
             {
                 ConfigNode cn = experienceTraits.ElementAt(i);
-                availableTraits.Add(cn.GetValue("title"));
+                traitTitles.Add(cn.GetValue("title"), true);
             }
-#if DEBUG
-            for (int i = 0; i < experienceTraits.Count(); i++)
-            {
-                Debug.Log("[EarnYourStripes]: Entry " + i + ": " + availableTraits.ElementAt(i));
-            }
-#endif
-            showGUI = true;
-            Debug.Log("[EarnYourStripes]: FirstKerbaliser: Start");
-        }
-
-        public void OnGUI()
-        {
-            if (showGUI) Window = GUILayout.Window(42736959, Window, GUIDisplay, "Earn Your Stripes", GUILayout.Width(200));
-        }
-
-        private void GUIDisplay(int id)
-        {
-            if (confirmation)
-            {
-                GUILayout.Label("Are you sure? You won't be able to make any further changes");
-                if (GUILayout.Button("Yes"))
-                {
-                    showGUI = false;
-                    UpdateAllKerbals();
-                    firstRun = false;
-                    Debug.Log("[EarnYourStripes]: Initial Crew Changes committed");
-                }
-                if (GUILayout.Button("No"))
-                {
-                    confirmation = false;
-                }
-                return;
-            }
-            randomise = GUILayout.Toggle(randomise, "Generate Starting Crew Randomly");
-            if (!randomise)
-            {
-                GUILayout.BeginVertical();
-                for (int i = 0; i < generatedKerbals.Count(); i++)
-                {
-                    ProtoCrewMember p = generatedKerbals.ElementAt(i);
-                    if (GUILayout.Button(p.name))
-                    {
-                        if (selected != p) selected = p;
-                        else selected = null;
-                        Debug.Log("[EarnYourStripes]: " + p.name + " selected for editing");
-                    }
-                    if (selected == p)
-                    {
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        if (GUILayout.Button("Change Name"))
-                        {
-                            nameChange = true;
-                            nameChanging = p.name;
-                            Debug.Log("[EarnYourStripes]: Changing name of " + p.name);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        if (nameChange && nameChanging == p.name)
-                        {
-                            nameChanging = GUILayout.TextField(nameChanging);
-                            p.ChangeName(nameChanging);
-                            if (GUILayout.Button("Save"))
-                            {
-                                nameChange = false;
-                                Debug.Log("[EarnYourStripes]: Commited name change to " + p.name);
-                            }
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        if (GUILayout.Button("Gender: " + p.gender))
-                        {
-                            if (p.gender == ProtoCrewMember.Gender.Male) p.gender = ProtoCrewMember.Gender.Female;
-                            else p.gender = ProtoCrewMember.Gender.Male;
-                            Debug.Log("[EarnYourStripes]: " + p.name + " gender changed to " + p.gender);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        string traitName = p.GetLocalizedTrait();
-                        if (traitName == "Kerbal") traitName = p.trait;
-                        if (GUILayout.Button("Class: " + traitName))
-                        {
-                            int index = FindIndex(p.trait);
-                            if (index > availableTraits.Count - 1) index = 0;
-                            trait = availableTraits.ElementAt(index);
-                            KerbalRoster.SetExperienceTrait(p, trait);
-                            Debug.Log("[EarnYourStripes]: " + p.name + " class changed to " + p.trait);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        GUILayout.Label("Courage");
-                        float.TryParse(GUILayout.TextField(p.courage.ToString()), out p.courage);
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        GUILayout.Label("Stupidity");
-                        float.TryParse(GUILayout.TextField(p.stupidity.ToString()), out p.stupidity);
-                        GUILayout.EndHorizontal();
-                        if (p.courage > 0.99) p.courage = 0.99f;
-                        if (p.stupidity > 0.99) p.stupidity = 0.99f;
-                        if (p.courage < 0.01) p.courage = 0.01f;
-                        if (p.stupidity < 0.01) p.stupidity = 0.01f;
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        p.isBadass = GUILayout.Toggle(p.isBadass, "BadS?");
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(indent);
-                        if (GUILayout.Button("Remove Kerbal"))
-                        {
-                            Debug.Log("[EarnYourStripes]: Deleting " + p.name);
-                            generatedKerbals.Remove(p);
-                        }
-                        GUILayout.EndHorizontal();
-                    }
-                }
-                GUILayout.Space(indent);
-                if (GUILayout.Button("Add new Kerbal"))
-                {
-                    ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours) p.veteran = true;
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
-                    HighLogic.CurrentGame.CrewRoster.AddCrewMember(p);
-                    generatedKerbals.Add(p);
-                    Debug.Log("[EarnYourStripes]: New Kerbal added: " + p.name);
-                }
-                GUILayout.Space(indent);
-                GUILayout.EndVertical();
-            }
-            else
-            {
-                GUILayout.Label("How many Kerbals do you want to start with?");
-                string buttonString = string.Empty;
-                int.TryParse(GUILayout.TextField(numberOfKerbalsToGenerate.ToString()), out numberOfKerbalsToGenerate);
-                if (disallowedTraits.Contains("Male")) buttonString = "Males: Not Allowed";
-                else buttonString = "Males: Allowed";
-                if (GUILayout.Button(buttonString))
-                {
-                    if (disallowedTraits.Contains("Male")) disallowedTraits.Remove("Male");
-                    else disallowedTraits.Add("Male");
-                }
-                if (disallowedTraits.Contains("Female")) buttonString = "Females: Not Allowed";
-                else buttonString = "Females: Allowed";
-                if (GUILayout.Button(buttonString))
-                {
-                    if (disallowedTraits.Contains("Female")) disallowedTraits.Remove("Female");
-                    else disallowedTraits.Add("Female");
-                }
-                for (int i = 0; i < availableTraits.Count(); i++)
-                {
-                    string selectedTrait = availableTraits.ElementAt(i);
-                    if (selectedTrait == "Tourist") continue;
-                    if (disallowedTraits.Contains(selectedTrait))
-                    {
-                        buttonString = selectedTrait + ": Not Allowed";
-                    }
-                    else
-                    {
-                        buttonString = selectedTrait + ": Allowed";
-                    }
-                    if (GUILayout.Button(buttonString))
-                    {
-                        if (disallowedTraits.Contains(selectedTrait)) disallowedTraits.Remove(selectedTrait);
-                        else disallowedTraits.Add(selectedTrait);
-                    }
-                }
-            }
-            if (GUILayout.Button("Done")) confirmation = true;
-            GUI.DragWindow();
-        }
-
-        private int FindIndex(string kerbalTrait)
-        {
-            for (int i = 0; i < availableTraits.Count(); i++)
-            {
-                string s = availableTraits.ElementAt(i);
-                if (s == kerbalTrait)
-                {
-                    try
-                    {
-                        if (availableTraits.ElementAt(i + 1) == "Tourist") return i + 2;
-                    }
-                    catch
-                    {
-                        return 0;
-                    }
-                    return i + 1;
-                }
-            }
-            return -1;
-        }
-
-        void UpdateAllKerbals()
-        {
-            if (randomise) generatedKerbals.Clear();
-            List<ProtoCrewMember> kerbals = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
-            for (int i = 0; i < kerbals.Count(); i++)
-            {
-                ProtoCrewMember p = kerbals.ElementAt(i);
-                if (p.rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
-                bool found = false;
-                for (int g = 0; g < generatedKerbals.Count(); g++)
-                {
-                    ProtoCrewMember generated = generatedKerbals.ElementAt(g);
-                    if (p.name == generated.name)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    Debug.Log("[EarnYourStripes]: " + p.name + " not selected with initial crew. Removing");
-                    HighLogic.CurrentGame.CrewRoster.Remove(p);
-                }
-            }
-            if (randomise)
-            {
-                int i = 0;
-                Debug.Log("[EarnYourStripes]: Running Random Crew Generator");
-                Debug.Log("[EarnYourStripes]: allowMales: " + allowMales + " allowFemales: " + allowFemales + " allowPilots: " + allowPilots + " allowScientists: " + allowScientists + " allowEngineers: " + allowEngineers);
-                while (i < numberOfKerbalsToGenerate)
-                {
-                    ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal(ProtoCrewMember.KerbalType.Crew);
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours) p.veteran = true;
-                    if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(p, 5);
-                    if (disallowedTraits.Contains("Male") && p.gender == ProtoCrewMember.Gender.Male) HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (disallowedTraits.Contains("Female") && p.gender == ProtoCrewMember.Gender.Female) HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else if (disallowedTraits.Contains(p.trait)) HighLogic.CurrentGame.CrewRoster.Remove(p);
-                    else
-                    {
-                        Debug.Log("[EarnYourStripes]: " + p.name + " selected randomly for initial crew");
-                        Debug.Log("[EarnYourStripes]: " + p.trait + ", " + p.gender);
-                        i++;
-                    }
-                }
-            }
+            return traitTitles;
         }
     }
 }

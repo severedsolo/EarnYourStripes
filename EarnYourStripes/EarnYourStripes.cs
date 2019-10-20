@@ -10,15 +10,16 @@ namespace EarnYourStripes
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class EarnYourStripes : MonoBehaviour
     {
-        public static EarnYourStripes instance;
+        public static EarnYourStripes Instance;
         public List<string> promotedKerbals = new List<string>();
-        StripeSettings settings;
+        private StripeSettings _settings;
+        public bool firstRun = true;
 
         private void Awake()
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(this);
-            settings = HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>();
+            _settings = HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>();
             Debug.Log("[EarnYourStripes]: Earn Your Stripes is Awake");
         }
         private void Start()
@@ -32,57 +33,57 @@ namespace EarnYourStripes
 
         private void OnKerbalAdded(ProtoCrewMember kerbal)
         {
-            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().basicSuit) kerbal.suit = ProtoCrewMember.KerbalSuit.Vintage;
+            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BasicSuit) kerbal.suit = ProtoCrewMember.KerbalSuit.Vintage;
         }
 
-        void StripHonours()
+        private void StripHonours()
         {
-            IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
-            if (crew.Count() == 0) return;
+            List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
+            if (crew.Count == 0) return;
             for (int i = 0; i < crew.Count(); i++)
             {
                 string p = crew.ElementAt(i).name;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug)
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug)
                 {
                     Debug.Log("[EarnYourStripes]: Attempting to process StripHonours for " + p);
                     Debug.Log("[EarnYourStripes]: promotedKerbals.Contains(p):" + promotedKerbals.Contains(p));
                     Debug.Log("[EarnYourStripes]: Veteran Status:" + crew.ElementAt(i).veteran);
-                    Debug.Log("[EarnYourStipes]: StripHonours On: " + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours);
+                    Debug.Log("[EarnYourStripes]: StripHonours On: " + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours);
                 }
-                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().removeExistingHonours)
+                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours)
                 {
                     crew.ElementAt(i).veteran = false;
                     Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
                 }
-                else if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug)
+                else if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug)
                 {
                     Debug.Log("[EarnYourStripes]: Failed to remove honours of " + p);
                 }
 
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().basicSuit) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Vintage;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed)
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BasicSuit) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Vintage;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().PilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().ScientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().EngineersAllowed)
                 {
-                    if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().debug) Debug.Log("[EarnYourStripes]: All classes allowed");
+                    if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[EarnYourStripes]: All classes allowed");
                     continue;
                 }
                 switch(crew.ElementAt(i).trait)
                 {
                     case "Pilot":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().pilotsAllowed)
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().PilotsAllowed)
                         {
                             crew.ElementAt(i).veteran = false;
                             Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
                         }
                         break;
                     case "Scientist":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().scientistsAllowed)
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().ScientistsAllowed)
                         {
                             crew.ElementAt(i).veteran = false;
                             Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
                         }
                         break;
                     case "Engineer":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().engineersAllowed)
+                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().EngineersAllowed)
                         {
                             crew.ElementAt(i).veteran = false;
                             Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
@@ -98,11 +99,11 @@ namespace EarnYourStripes
 
         private void UpdateSuits()
         {
-            IEnumerable<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew;
-            if (crew.Count() == 0) return;
-            for (int i = 0; i < crew.Count(); i++)
+            List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
+            if (crew.Count == 0) return;
+            for (int i = 0; i < crew.Count; i++)
             {
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().bgSuits && crew.ElementAt(i).veteran) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Future;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BgSuits && crew.ElementAt(i).veteran) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Future;
             }
         }
         private void OnGameSettingsApplied()
@@ -123,7 +124,7 @@ namespace EarnYourStripes
             {
                 promotedKerbals.Add(p.name);
                 p.veteran = true;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().bgSuits && p.veteran) p.suit = ProtoCrewMember.KerbalSuit.Future;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BgSuits && p.veteran) p.suit = ProtoCrewMember.KerbalSuit.Future;
                 Debug.Log("[EarnYourStripes]: Promoting " + p.name);
             }
             UpdateSuits();
@@ -131,19 +132,19 @@ namespace EarnYourStripes
 
         private bool EligibleForPromotion(int flights, double met, int worldFirsts)
         {
-            if (flights < settings.numberOfFlightsRequired)
+            if (flights < _settings.NumberOfFlightsRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+settings.numberOfFlightsRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+_settings.NumberOfFlightsRequired);
                 return false;
             }
 
-            if (met < settings.flightHoursRequired)
+            if (met < _settings.FlightHoursRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+settings.flightHoursRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+_settings.FlightHoursRequired);
                 return false;
             }
 
-            if (worldFirsts < 1 && settings.worldFirsts)
+            if (worldFirsts < 1 && _settings.WorldFirsts)
             {
                 Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
                 return false;

@@ -9,12 +9,12 @@ using FlightTracker;
 namespace EarnYourStripes
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
-    class AstronautComplexHandler : MonoBehaviour
+    internal class AstronautComplexHandler : MonoBehaviour
     {
-        bool astronautComplexSpawned = false;
-        bool updateDone = false;
+        private bool _astronautComplexSpawned = false;
+        private bool _updateDone = false;
 
-        void Start()
+        private void Start()
         {
             GameEvents.onGUIAstronautComplexSpawn.Add(AstronautComplexSpawned);
             GameEvents.onGUIAstronautComplexDespawn.Add(AstronautComplexDespawned);
@@ -23,15 +23,15 @@ namespace EarnYourStripes
 
         private void AstronautComplexDespawned()
         {
-            astronautComplexSpawned = false;
-            updateDone = false;
+            _astronautComplexSpawned = false;
+            _updateDone = false;
             Debug.Log("[EarnYourStripes]: Astronaut Complex despawned");
         }
 
         private void AstronautComplexSpawned()
         {
             Debug.Log("[EarnYourStripes]: Astronaut Complex spawned");
-            astronautComplexSpawned = true;
+            _astronautComplexSpawned = true;
         }
 
         private string ConvertUtToString(double time)
@@ -46,7 +46,7 @@ namespace EarnYourStripes
 
         private void LateUpdate()
         {
-            if (astronautComplexSpawned && !updateDone)
+            if (_astronautComplexSpawned && !_updateDone)
             {
                 Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
                 IEnumerable<CrewListItem> crewItemContainers = FindObjectsOfType<CrewListItem>();
@@ -59,13 +59,13 @@ namespace EarnYourStripes
                     string kerbalName = p.name;
                     double flightTime = ActiveFlightTracker.instance.GetRecordedMissionTimeSeconds(kerbalName);
                     kerbalName = p.name + " (" + ConvertUtToString(flightTime)+" hrs)";
-                    if (crewContainer.GetName() == kerbalName) updateDone = true;
+                    if (crewContainer.GetName() == kerbalName) _updateDone = true;
                     if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) crewContainer.SetName(kerbalName);
                 }
             }
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             GameEvents.onGUIAstronautComplexSpawn.Remove(AstronautComplexSpawned);
             GameEvents.onGUIAstronautComplexDespawn.Remove(AstronautComplexDespawned);
