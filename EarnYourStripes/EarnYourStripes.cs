@@ -2,12 +2,10 @@
 using System.Linq;
 using UnityEngine;
 using FlightTracker;
-using System;
-using Expansions;
 
 namespace EarnYourStripes
 {
-    [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
+    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class EarnYourStripes : MonoBehaviour
     {
         public static EarnYourStripes Instance;
@@ -17,7 +15,6 @@ namespace EarnYourStripes
         private void Awake()
         {
             Instance = this;
-            DontDestroyOnLoad(this);
             Debug.Log("[EarnYourStripes]: Earn Your Stripes is Awake");
         }
         private void Start()
@@ -132,13 +129,13 @@ namespace EarnYourStripes
         {
             if (flights < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired);
                 return false;
             }
 
             if (met < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+ HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired);
+                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired);
                 return false;
             }
 
@@ -153,8 +150,8 @@ namespace EarnYourStripes
         private void OnDestroy()
         {
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            GameEvents.onKerbalAddComplete.Remove(OnKerbalAdded);
             if (ActiveFlightTracker.onFlightTrackerUpdated != null) ActiveFlightTracker.onFlightTrackerUpdated.Remove(FlightTrackerUpdated);
+            GameEvents.onKerbalAddComplete.Remove(OnKerbalAdded);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
     }
