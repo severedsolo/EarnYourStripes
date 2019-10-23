@@ -53,7 +53,7 @@ namespace EarnYourStripes
         public int FlightHoursRequired = 12;
 
         [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
-        public bool WorldFirsts = false;
+        public bool WorldFirsts = true;
         
         [GameParameters.CustomParameterUI("Replace Starting Crew", toolTip = "Replace the 'Big 4' with a different starting crew?")]
         public bool GenerateCrew = true;
@@ -74,7 +74,7 @@ namespace EarnYourStripes
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
         public override bool HasPresets { get { return false; } }
         [GameParameters.CustomParameterUI("Remove Existing Honours?", toolTip = "Remove Honours from the Big 4 if they haven't earned it")]
-        public bool RemoveExistingHonours = false;
+        public bool RemoveExistingHonours = true;
         [GameParameters.CustomParameterUI("Allow Pilot Veterans")]
         public bool PilotsAllowed = true;
         [GameParameters.CustomParameterUI("Allow Scientist Veterans")]

@@ -17,7 +17,6 @@ C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Rel
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.dll
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.pdb
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.csprojAssemblyReference.cache
-/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.csproj.CoreCompileInputs.cache
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.dll
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.pdb
 /home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Release/EarnYourStripes.dll

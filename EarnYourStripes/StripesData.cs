@@ -13,6 +13,7 @@ namespace EarnYourStripes
         public override void OnSave(ConfigNode node)
         {
             int counter = 0;
+            node.AddValue("firstRun", EarnYourStripes.Instance.firstRun);
             for(int i = 0; i<EarnYourStripes.Instance.promotedKerbals.Count(); i++)
             {
                 ConfigNode temp = new ConfigNode("PROMOTED_KERBAL");
