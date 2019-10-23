@@ -1,0 +1,5 @@
+/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/.NETFramework,Version=v4.6.AssemblyAttribute.cs
+/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Release/EarnYourStripes.pdb
+/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/bin/Release/EarnYourStripes.dll
+/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.dll
+/home/martin/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Release/EarnYourStripes.pdb
