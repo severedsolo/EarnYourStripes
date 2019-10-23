@@ -101,6 +101,10 @@ namespace EarnYourStripes
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Select a Kerbal To Edit"));
             dialogElements.Add(GenerateListOfKerbals());
+            dialogElements.Add(new DialogGUIButton("Done", () => _uidialog.Dismiss(), false));
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("FirstKerbaliserCustomKerbalDialog", "", "Earn Your Stripes", UISkinManager.defaultSkin,
+                    new Rect(0.5f, 0.5f, 200.0f, 90.0f), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
         }
 
         DialogGUIVerticalLayout GenerateListOfKerbals()
@@ -143,6 +147,11 @@ namespace EarnYourStripes
             horizontal[0] = new DialogGUILabel(() => "Courage: "+_kerbalToEdit.courage);
             horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            dialogElements.Add(new DialogGUIButton("Done", SwitchMode));
+            return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new MultiOptionDialog("FirstKerbaliserEditKerbalDialog", "", "Earn Your Stripes", UISkinManager.defaultSkin,
+                    new Rect(0.5f, 0.5f, 200.0f, 90.0f), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
+            
         }
 
         private void SwitchGender()
