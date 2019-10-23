@@ -67,6 +67,20 @@ namespace EarnYourStripes
             return new DialogGUIHorizontalLayout(horizontal.ToArray());
         }
         
+        private DialogGUIHorizontalLayout TraitDialogOptions(ProtoCrewMember pcm)
+        {
+            _traits = GetAvailableTraits();
+            List<DialogGUIBase> horizontal = new List<DialogGUIBase>();
+            Debug.Log("[FirstKerbaliser]: UI: Processing "+_traits.Count + " elements");
+            for (int i = 0; i < _traits.Count; i++)
+            {
+                string s = _traits.ElementAt(i).Key;
+                horizontal.Add(new DialogGUIButton("Make " + s, () => KerbalRoster.SetExperienceTrait(pcm, s)));
+                Debug.Log("[FirstKerbaliser]: UI: Added "+_traits.ElementAt(i)+" to UI");
+            }
+            return new DialogGUIHorizontalLayout(horizontal.ToArray());
+        }
+        
         private void SwitchMode()
         {
             if(_uidialog!= null) _uidialog.Dismiss();
@@ -96,6 +110,7 @@ namespace EarnYourStripes
             for (int i = 0; i < crew.Count; i++)
             {
                 ProtoCrewMember pcm = crew.ElementAt(i);
+                if(pcm.rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
                 verticalElements.Add(new DialogGUIButton(pcm.displayName, () => SetKerbalToEdit(pcm), true));
             }
             return new DialogGUIVerticalLayout(verticalElements.ToArray());
@@ -116,7 +131,24 @@ namespace EarnYourStripes
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUITextInput(_kerbalToEdit.name, false, 100, SetName, 30 ));
-            
+            DialogGUIBase[] horizontal = new DialogGUIBase[2];
+            horizontal[0] = new DialogGUILabel(() => "Gender: "+_kerbalToEdit.gender);
+            horizontal[1] = new DialogGUIButton("Change", SwitchGender);
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            dialogElements.Add(new DialogGUILabel( () => "Class: "+_kerbalToEdit.trait));
+            dialogElements.Add(TraitDialogOptions(_kerbalToEdit));
+            horizontal[0] = new DialogGUILabel(() => "Stupidity: "+_kerbalToEdit.stupidity);
+            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+            horizontal[0] = new DialogGUILabel(() => "Courage: "+_kerbalToEdit.courage);
+            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
+            dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
+        }
+
+        private void SwitchGender()
+        {
+            if (_kerbalToEdit.gender == ProtoCrewMember.Gender.Female) _kerbalToEdit.gender = ProtoCrewMember.Gender.Male;
+            else _kerbalToEdit.gender = ProtoCrewMember.Gender.Female;
         }
 
         private string SetName(string nameToSet)
