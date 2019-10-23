@@ -75,7 +75,7 @@ namespace EarnYourStripes
             for (int i = 0; i < _traits.Count; i++)
             {
                 string s = _traits.ElementAt(i).Key;
-                horizontal.Add(new DialogGUIButton("Make " + s, () => KerbalRoster.SetExperienceTrait(pcm, s)));
+                horizontal.Add(new DialogGUIButton("Make " + s, () => KerbalRoster.SetExperienceTrait(pcm, s), false));
                 Debug.Log("[FirstKerbaliser]: UI: Added "+_traits.ElementAt(i)+" to UI");
             }
             return new DialogGUIHorizontalLayout(horizontal.ToArray());
@@ -115,7 +115,7 @@ namespace EarnYourStripes
             {
                 ProtoCrewMember pcm = crew.ElementAt(i);
                 if(pcm.rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
-                verticalElements.Add(new DialogGUIButton(pcm.displayName, () => SetKerbalToEdit(pcm), true));
+                verticalElements.Add(new DialogGUIButton(() => pcm.displayName, () => SetKerbalToEdit(pcm), 50.0f, 10.0f, false ));
             }
             return new DialogGUIVerticalLayout(verticalElements.ToArray());
         }
@@ -145,7 +145,7 @@ namespace EarnYourStripes
             horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
             horizontal[0] = new DialogGUILabel(() => "Courage: "+_kerbalToEdit.courage);
-            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
+            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.courage, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.courage = newValue; });
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
             dialogElements.Add(new DialogGUIButton("Done", SwitchMode));
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
