@@ -48,20 +48,33 @@ namespace EarnYourStripes
         {
             if (!astronautComplexSpawned || updateDone) return;
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation;
+            List<CrewListItem> crewToOverwrite = GetCrewToOverwrite(FindObjectsOfType<CrewListItem>().ToList());
+            if (crewToOverwrite.Count == 0) updateDone = true;
             Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
-            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-            IEnumerable<CrewListItem> crewItemContainers = FindObjectsOfType<CrewListItem>();
-            for (int i = 0; i < crewItemContainers.Count(); i++)
+            for (int i = 0; i < crewToOverwrite.Count; i++)
             {
-                CrewListItem crewContainer = crewItemContainers.ElementAt(i);
+                CrewListItem crewContainer = crewToOverwrite.ElementAt(i);
                 ProtoCrewMember p = crewContainer.GetCrewRef();
-                if (p.type == ProtoCrewMember.KerbalType.Applicant) continue;
                 string kerbalName = p.name;
                 double flightTime = FlightTrackerApi.Instance.GetRecordedMissionTimeSeconds(kerbalName);
                 kerbalName = p.name + " (" + ConvertUtToString(flightTime)+" hrs)";
                 if (crewContainer.GetName() == kerbalName) updateDone = true;
                 if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) crewContainer.SetName(kerbalName);
             }
+        }
+
+        private List<CrewListItem> GetCrewToOverwrite(List<CrewListItem> crewItemContainers)
+        {
+            List<CrewListItem> crewToOverwrite = new List<CrewListItem>();
+            for (int i = 0; i < crewItemContainers.Count(); i++)
+            {
+                CrewListItem crewContainer = crewItemContainers.ElementAt(i);
+                ProtoCrewMember p = crewContainer.GetCrewRef();
+                if (p.type == ProtoCrewMember.KerbalType.Applicant || p.type == ProtoCrewMember.KerbalType.Tourist) continue;
+                crewToOverwrite.Add(crewContainer);
+            }
+            return crewToOverwrite;
         }
 
         private void OnDisable()
