@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using KSP.UI;
 using FlightTracker;
@@ -11,8 +11,8 @@ namespace EarnYourStripes
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     internal class AstronautComplexHandler : MonoBehaviour
     {
-        private bool _astronautComplexSpawned = false;
-        private bool _updateDone = false;
+        private bool astronautComplexSpawned;
+        private bool updateDone;
 
         private void Start()
         {
@@ -23,45 +23,44 @@ namespace EarnYourStripes
 
         private void AstronautComplexDespawned()
         {
-            _astronautComplexSpawned = false;
-            _updateDone = false;
+            astronautComplexSpawned = false;
+            updateDone = false;
             Debug.Log("[EarnYourStripes]: Astronaut Complex despawned");
         }
 
         private void AstronautComplexSpawned()
         {
             Debug.Log("[EarnYourStripes]: Astronaut Complex spawned");
-            _astronautComplexSpawned = true;
+            astronautComplexSpawned = true;
         }
 
         private string ConvertUtToString(double time)
         {
             time = time / 60 / 60;
             time = (int)Math.Floor(time);
-            string timeString = time.ToString();
-            int stringLength = timeString.Count() - 3;
-            if (time.ToString().Count() > 4) timeString = timeString.Substring(0, stringLength) + "k";
+            string timeString = time.ToString(CultureInfo.CurrentCulture);
+            int stringLength = timeString.Length - 3;
+            if (time.ToString(CultureInfo.CurrentCulture).Length > 4) timeString = timeString.Substring(0, stringLength) + "k";
             return timeString;
         }
 
         private void LateUpdate()
         {
-            if (_astronautComplexSpawned && !_updateDone)
+            if (!astronautComplexSpawned || updateDone) return;
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            IEnumerable<CrewListItem> crewItemContainers = FindObjectsOfType<CrewListItem>();
+            for (int i = 0; i < crewItemContainers.Count(); i++)
             {
-                Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
-                IEnumerable<CrewListItem> crewItemContainers = FindObjectsOfType<CrewListItem>();
-                CrewListItem crewContainer;
-                for (int i = 0; i < crewItemContainers.Count(); i++)
-                {
-                    crewContainer = crewItemContainers.ElementAt(i);
-                    ProtoCrewMember p = crewContainer.GetCrewRef();
-                    if (p.type == ProtoCrewMember.KerbalType.Applicant) continue;
-                    string kerbalName = p.name;
-                    double flightTime = ActiveFlightTracker.instance.GetRecordedMissionTimeSeconds(kerbalName);
-                    kerbalName = p.name + " (" + ConvertUtToString(flightTime)+" hrs)";
-                    if (crewContainer.GetName() == kerbalName) _updateDone = true;
-                    if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) crewContainer.SetName(kerbalName);
-                }
+                CrewListItem crewContainer = crewItemContainers.ElementAt(i);
+                ProtoCrewMember p = crewContainer.GetCrewRef();
+                if (p.type == ProtoCrewMember.KerbalType.Applicant) continue;
+                string kerbalName = p.name;
+                double flightTime = FlightTrackerApi.Instance.GetRecordedMissionTimeSeconds(kerbalName);
+                kerbalName = p.name + " (" + ConvertUtToString(flightTime)+" hrs)";
+                if (crewContainer.GetName() == kerbalName) updateDone = true;
+                if (p.rosterStatus == ProtoCrewMember.RosterStatus.Available) crewContainer.SetName(kerbalName);
             }
         }
 

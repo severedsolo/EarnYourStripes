@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using UnityEngine;
-using FlightTracker;
 
 namespace EarnYourStripes
 {
@@ -14,7 +10,7 @@ namespace EarnYourStripes
         {
             int counter = 0;
             node.AddValue("firstRun", EarnYourStripes.Instance.firstRun);
-            for(int i = 0; i<EarnYourStripes.Instance.promotedKerbals.Count(); i++)
+            for(int i = 0; i<EarnYourStripes.Instance.promotedKerbals.Count; i++)
             {
                 ConfigNode temp = new ConfigNode("PROMOTED_KERBAL");
                 temp.SetValue("Name", EarnYourStripes.Instance.promotedKerbals.ElementAt(i), true);
@@ -29,7 +25,7 @@ namespace EarnYourStripes
             node.TryGetValue("firstRun", ref EarnYourStripes.Instance.firstRun);
             ConfigNode[] loaded = node.GetNodes("PROMOTED_KERBAL");
             EarnYourStripes.Instance.promotedKerbals.Clear();
-            for(int i = 0; i<loaded.Count();i++)
+            for(int i = 0; i<loaded.Length;i++)
             {
                 ConfigNode temp = loaded.ElementAt(i);
                 string s = temp.GetValue("Name");

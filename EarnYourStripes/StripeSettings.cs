@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable ConvertToConstant.Global
+
+// ReSharper disable ArrangeAccessorOwnerBody
 
 namespace EarnYourStripes
 {
@@ -36,11 +38,14 @@ namespace EarnYourStripes
         {
             get { return false; }
         }
-
+        [UsedImplicitly]
         public bool AutoPersistance = true;
+        [UsedImplicitly]
+        // ReSharper disable once RedundantDefaultMemberInitializer
         public bool NewGameOnly = false;
         [GameParameters.CustomParameterUI("Enable Debug Mode")]
 #if DEBUG
+        [UsedImplicitly]
         public bool Debug = true;
 #endif
 #if !DEBUG
@@ -65,6 +70,8 @@ namespace EarnYourStripes
         public bool BgSuits = true;
     }
 
+    [SuppressMessage("ReSharper", "ArrangeAccessorOwnerBody")]
+    [UsedImplicitly]
     internal class StripeSettingsClassRestrictions : GameParameters.CustomParameterNode
     {
         public override string Title { get { return "Class Restrictions"; } }

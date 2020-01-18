@@ -1,31 +1,28 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Experience;
 using UnityEngine;
+// ReSharper disable ImplicitlyCapturedClosure
 
 namespace EarnYourStripes
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     internal class FirstKerbaliser : MonoBehaviour
     {
-        private PopupDialog _uidialog;
-        private bool _allowFemales = true;
-        private bool _allowMales = true;
-        private bool _randomKerbals = true;
-        private bool _invokingUi;
-        Dictionary<string, bool> _traits;
-        private ProtoCrewMember _kerbalToEdit;
-        private float _switchWindowTime = 0.1f;
+        private PopupDialog uiDialog;
+        private bool allowFemales = true;
+        private bool allowMales = true;
+        private bool randomKerbals = true;
+        private bool invokingUi;
+        private Dictionary<string, bool> traits;
+        private ProtoCrewMember kerbalToEdit;
+        private const float SwitchWindowTime = 0.1f;
 
 
         private void Start()
         {
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().GenerateCrew) return;
             if (!EarnYourStripes.Instance.firstRun) return;
-            _uidialog = RandomKerbalDialog();
+            uiDialog = RandomKerbalDialog();
             Debug.Log("[FirstKerbaliser].Start");
         }
 
@@ -38,7 +35,7 @@ namespace EarnYourStripes
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             int numberOfRandomKerbals = 4;
-            dialogElements.Add(new DialogGUIToggle(() => _randomKerbals, "Generate Random Kerbals", b => { SwitchMode(); }));
+            dialogElements.Add(new DialogGUIToggle(() => randomKerbals, "Generate Random Kerbals", b => { SwitchMode(); }));
             DialogGUIBase[] verticalArray = new DialogGUIBase[3];
             verticalArray[0] = new DialogGUILabel(() => "Number of Kerbals: " + numberOfRandomKerbals);
             verticalArray[1] = new DialogGUISpace(30.0f);
@@ -46,8 +43,8 @@ namespace EarnYourStripes
             dialogElements.Add(new DialogGUIHorizontalLayout(verticalArray));
             verticalArray = new DialogGUIBase[2];
             DialogGUIBase[] splitBox = new DialogGUIBase[2];
-            verticalArray[0] = new DialogGUIToggle(_allowFemales, "Allow Female Kerbals", b => _allowFemales = b);
-            verticalArray[1] = new DialogGUIToggle(_allowMales, "Allow Male Kerbals", b => _allowMales = b);
+            verticalArray[0] = new DialogGUIToggle(allowFemales, "Allow Female Kerbals", b => allowFemales = b);
+            verticalArray[1] = new DialogGUIToggle(allowMales, "Allow Male Kerbals", b => allowMales = b);
             splitBox[0] = new DialogGUIVerticalLayout(verticalArray);
             splitBox[1] = new DialogGUIVerticalLayout(TraitDialogOptions());
             dialogElements.Add(new DialogGUIHorizontalLayout(splitBox));
@@ -60,14 +57,14 @@ namespace EarnYourStripes
 
         private DialogGUIVerticalLayout TraitDialogOptions()
         {
-            _traits = GetAvailableTraits();
+            traits = GetAvailableTraits();
             List<DialogGUIBase> horizontal = new List<DialogGUIBase>();
-            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Processing " + _traits.Count + " elements");
-            for (int i = 0; i < _traits.Count; i++)
+            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Processing " + traits.Count + " elements");
+            for (int i = 0; i < traits.Count; i++)
             {
-                string s = _traits.ElementAt(i).Key;
-                horizontal.Add(new DialogGUIToggle(_traits.ElementAt(i).Value, () => "Allow: " + s, b => { _traits[s] = b; }));
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Added " + _traits.ElementAt(i) + " to UI");
+                string s = traits.ElementAt(i).Key;
+                horizontal.Add(new DialogGUIToggle(traits.ElementAt(i).Value, () => "Allow: " + s, b => { traits[s] = b; }));
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Added " + traits.ElementAt(i) + " to UI");
             }
 
             return new DialogGUIVerticalLayout(horizontal.ToArray());
@@ -75,14 +72,14 @@ namespace EarnYourStripes
 
         private DialogGUIHorizontalLayout TraitDialogOptions(ProtoCrewMember pcm)
         {
-            _traits = GetAvailableTraits();
+            traits = GetAvailableTraits();
             List<DialogGUIBase> horizontal = new List<DialogGUIBase>();
-            Debug.Log("[FirstKerbaliser]: UI: Processing " + _traits.Count + " elements");
-            for (int i = 0; i < _traits.Count; i++)
+            Debug.Log("[FirstKerbaliser]: UI: Processing " + traits.Count + " elements");
+            for (int i = 0; i < traits.Count; i++)
             {
-                string s = _traits.ElementAt(i).Key;
+                string s = traits.ElementAt(i).Key;
                 horizontal.Add(new DialogGUIButton(s, () => KerbalRoster.SetExperienceTrait(pcm, s), s.Length * 10, 20.0f, false));
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Added " + _traits.ElementAt(i) + " to UI");
+                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: UI: Added " + traits.ElementAt(i) + " to UI");
             }
 
             return new DialogGUIHorizontalLayout(horizontal.ToArray());
@@ -90,18 +87,18 @@ namespace EarnYourStripes
 
         private void SwitchMode()
         {
-            if (_uidialog != null) _uidialog.Dismiss();
-            if (!_invokingUi)
+            if (uiDialog != null) uiDialog.Dismiss();
+            if (!invokingUi)
             {
-                _randomKerbals = !_randomKerbals;
-                _invokingUi = true;
-                Invoke(nameof(SwitchMode), _switchWindowTime);
+                randomKerbals = !randomKerbals;
+                invokingUi = true;
+                Invoke(nameof(SwitchMode), SwitchWindowTime);
                 return;
             }
 
-            if (_randomKerbals) _uidialog = RandomKerbalDialog();
-            else _uidialog = CustomKerbalDialog();
-            _invokingUi = false;
+            if (randomKerbals) uiDialog = RandomKerbalDialog();
+            else uiDialog = CustomKerbalDialog();
+            invokingUi = false;
         }
 
         private PopupDialog CustomKerbalDialog()
@@ -118,12 +115,12 @@ namespace EarnYourStripes
         private void NewKerbal()
         {
             ProtoCrewMember p = HighLogic.CurrentGame.CrewRoster.GetNewKerbal();
-            _kerbalToEdit = p;
+            kerbalToEdit = p;
             Debug.Log("[EarnYourStripes]: Generating New Kerbal " + p.name);
             EditKerbal();
         }
 
-        DialogGUIVerticalLayout GenerateListOfKerbals()
+        private DialogGUIVerticalLayout GenerateListOfKerbals()
         {
             List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
             List<DialogGUIBase> verticalElements = new List<DialogGUIBase>();
@@ -139,32 +136,32 @@ namespace EarnYourStripes
 
         private void SetKerbalToEdit(ProtoCrewMember pcm)
         {
-            _kerbalToEdit = pcm;
-            Invoke(nameof(EditKerbal), _switchWindowTime);
+            kerbalToEdit = pcm;
+            Invoke(nameof(EditKerbal), SwitchWindowTime);
         }
 
         private void EditKerbal()
         {
-            Debug.Log("[EarnYourStripes]: Editing " + _kerbalToEdit.name);
-            _uidialog = EditKerbalDialog();
+            Debug.Log("[EarnYourStripes]: Editing " + kerbalToEdit.name);
+            uiDialog = EditKerbalDialog();
         }
 
         private PopupDialog EditKerbalDialog()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             LockCamera();
-            dialogElements.Add(new DialogGUITextInput(_kerbalToEdit.name, false, 100, SetName, 30));
+            dialogElements.Add(new DialogGUITextInput(kerbalToEdit.name, false, 100, SetName, 30));
             DialogGUIBase[] horizontal = new DialogGUIBase[2];
-            horizontal[0] = new DialogGUILabel(() => "Gender: " + _kerbalToEdit.gender);
+            horizontal[0] = new DialogGUILabel(() => "Gender: " + kerbalToEdit.gender);
             horizontal[1] = new DialogGUIButton("Change", SwitchGender, 50.0f, 20.0f, false);
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
-            dialogElements.Add(new DialogGUILabel(() => "Class: " + _kerbalToEdit.trait));
-            dialogElements.Add(TraitDialogOptions(_kerbalToEdit));
-            horizontal[0] = new DialogGUILabel(() => "Stupidity: " + _kerbalToEdit.stupidity);
-            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.stupidity = newValue; });
+            dialogElements.Add(new DialogGUILabel(() => "Class: " + kerbalToEdit.trait));
+            dialogElements.Add(TraitDialogOptions(kerbalToEdit));
+            horizontal[0] = new DialogGUILabel(() => "Stupidity: " + kerbalToEdit.stupidity);
+            horizontal[1] = new DialogGUISlider(() => kerbalToEdit.stupidity, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { kerbalToEdit.stupidity = newValue; });
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
-            horizontal[0] = new DialogGUILabel(() => "Courage: " + _kerbalToEdit.courage);
-            horizontal[1] = new DialogGUISlider(() => _kerbalToEdit.courage, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { _kerbalToEdit.courage = newValue; });
+            horizontal[0] = new DialogGUILabel(() => "Courage: " + kerbalToEdit.courage);
+            horizontal[1] = new DialogGUISlider(() => kerbalToEdit.courage, 0.0f, 1.0f, false, 100.0f, 30.0f, newValue => { kerbalToEdit.courage = newValue; });
             dialogElements.Add(new DialogGUIHorizontalLayout(horizontal));
             dialogElements.Add(new DialogGUIButton("Done", () => ClearControlLock(true)));
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -175,15 +172,15 @@ namespace EarnYourStripes
 
         private void SwitchGender()
         {
-            if (_kerbalToEdit.gender == ProtoCrewMember.Gender.Female) _kerbalToEdit.gender = ProtoCrewMember.Gender.Male;
-            else _kerbalToEdit.gender = ProtoCrewMember.Gender.Female;
-            Debug.Log("[EarnYourStripes]: " + _kerbalToEdit.name + " Gender Change");
+            if (kerbalToEdit.gender == ProtoCrewMember.Gender.Female) kerbalToEdit.gender = ProtoCrewMember.Gender.Male;
+            else kerbalToEdit.gender = ProtoCrewMember.Gender.Female;
+            Debug.Log("[EarnYourStripes]: " + kerbalToEdit.name + " Gender Change");
         }
 
         private string SetName(string nameToSet)
         {
-            Debug.Log("[EarnYourStripes]: Changing " + _kerbalToEdit.name + " to " + nameToSet);
-            _kerbalToEdit.ChangeName(nameToSet);
+            Debug.Log("[EarnYourStripes]: Changing " + kerbalToEdit.name + " to " + nameToSet);
+            kerbalToEdit.ChangeName(nameToSet);
             return nameToSet;
         }
 
@@ -191,9 +188,9 @@ namespace EarnYourStripes
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Your choices were invalid. Try again"));
-            _randomKerbals = !_randomKerbals;
-            _allowMales = true;
-            _allowFemales = true;
+            randomKerbals = !randomKerbals;
+            allowMales = true;
+            allowFemales = true;
             dialogElements.Add(new DialogGUIButton("OK", SwitchMode));
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new MultiOptionDialog("FirstKerbaliserErrorDialog", "", "Earn Your Stripes", UISkinManager.defaultSkin,
@@ -206,7 +203,7 @@ namespace EarnYourStripes
         {
             if (!ValidSelection())
             {
-                Invoke(nameof(GenerateBrokenDialog), _switchWindowTime);
+                Invoke(nameof(GenerateBrokenDialog), SwitchWindowTime);
                 return;
             }
 
@@ -241,31 +238,37 @@ namespace EarnYourStripes
         private void ClearControlLock(bool switchMode)
         {
             InputLockManager.RemoveControlLock("EYSCameraLock");
-            _randomKerbals = true;
-            if (_uidialog != null) _uidialog.Dismiss();
+            randomKerbals = true;
+            if (uiDialog != null) uiDialog.Dismiss();
             EarnYourStripes.Instance.firstRun = false;
-            if (switchMode) Invoke(nameof(SwitchMode), _switchWindowTime);
+            if (switchMode) Invoke(nameof(SwitchMode), SwitchWindowTime);
         }
 
         private bool ValidKerbal(ProtoCrewMember.Gender gender, string trait)
         {
-            if (gender == ProtoCrewMember.Gender.Female && !_allowFemales) return false;
-            if (gender == ProtoCrewMember.Gender.Male && !_allowMales) return false;
-            if (!_traits[trait]) return false;
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch (gender)
+            {
+                case ProtoCrewMember.Gender.Female when !allowFemales:
+                case ProtoCrewMember.Gender.Male when !allowMales:
+                    return false;
+            }
+
+            if (!traits[trait]) return false;
             return true;
         }
 
         private void GenerateBrokenDialog()
         {
-            _uidialog = BrokenDialog();
+            uiDialog = BrokenDialog();
         }
 
         private bool ValidSelection()
         {
-            if (!_allowFemales && !_allowMales) return false;
-            for (int i = 0; i < _traits.Count; i++)
+            if (!allowFemales && !allowMales) return false;
+            for (int i = 0; i < traits.Count; i++)
             {
-                if (_traits.ElementAt(i).Value) return true;
+                if (traits.ElementAt(i).Value) return true;
             }
 
             return false;
@@ -275,7 +278,7 @@ namespace EarnYourStripes
         {
             ConfigNode[] experienceTraits = GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT");
             Dictionary<string, bool> traitTitles = new Dictionary<string, bool>();
-            for (int i = 0; i < experienceTraits.Count(); i++)
+            for (int i = 0; i < experienceTraits.Length; i++)
             {
                 if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[FirstKerbaliser]: Trying to Add Trait " + i);
                 ConfigNode cn = experienceTraits.ElementAt(i);

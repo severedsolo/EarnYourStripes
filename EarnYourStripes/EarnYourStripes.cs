@@ -19,7 +19,7 @@ namespace EarnYourStripes
         }
         private void Start()
         {
-            ActiveFlightTracker.onFlightTrackerUpdated.Add(FlightTrackerUpdated);
+            FlightTrackerApi.OnFlightTrackerUpdated.Add(FlightTrackerUpdated);
             GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
             GameEvents.onKerbalAddComplete.Add(OnKerbalAdded);
             Debug.Log("[EarnYourStripes]: Registered Event Handlers");
@@ -35,7 +35,7 @@ namespace EarnYourStripes
         {
             List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
             if (crew.Count == 0) return;
-            for (int i = 0; i < crew.Count(); i++)
+            for (int i = 0; i < crew.Count; i++)
             {
                 string p = crew.ElementAt(i).name;
                 if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug)
@@ -107,13 +107,12 @@ namespace EarnYourStripes
             StripHonours();
         }
 
-        internal void FlightTrackerUpdated (ProtoCrewMember p)
+        private void FlightTrackerUpdated (ProtoCrewMember p)
         {
             Debug.Log("[EarnYourStripes]: FlightTrackerUpdated");
-            string s = p.name;
-            int flights = ActiveFlightTracker.instance.GetNumberOfFlights(p.name);
-            double met = ActiveFlightTracker.instance.GetRecordedMissionTimeHours(p.name);
-            int worldFirsts = ActiveFlightTracker.instance.GetNumberOfWorldFirsts(p.name);
+            int flights = FlightTrackerApi.Instance.GetNumberOfFlights(p.name);
+            double met = FlightTrackerApi.Instance.GetRecordedMissionTimeHours(p.name);
+            int worldFirsts = FlightTrackerApi.Instance.GetNumberOfWorldFirsts(p.name);
             Debug.Log("[EarnYourStripes]: Evaluating "+p.name+"'s chances of promotion");
             if (!promotedKerbals.Contains(p.name) && EligibleForPromotion(flights, met, worldFirsts))
             {
@@ -139,18 +138,15 @@ namespace EarnYourStripes
                 return false;
             }
 
-            if (worldFirsts < 1 && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts)
-            {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
-                return false;
-            }
-            return true;
+            if (worldFirsts >= 1 || !HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts) return true;
+            Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
+            return false;
         }
 
         private void OnDestroy()
         {
             GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            if (ActiveFlightTracker.onFlightTrackerUpdated != null) ActiveFlightTracker.onFlightTrackerUpdated.Remove(FlightTrackerUpdated);
+            if (FlightTrackerApi.OnFlightTrackerUpdated != null) FlightTrackerApi.OnFlightTrackerUpdated.Remove(FlightTrackerUpdated);
             GameEvents.onKerbalAddComplete.Remove(OnKerbalAdded);
             Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
         }
