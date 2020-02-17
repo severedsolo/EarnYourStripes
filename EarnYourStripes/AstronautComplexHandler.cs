@@ -50,7 +50,7 @@ namespace EarnYourStripes
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation;
             List<CrewListItem> crewToOverwrite = GetCrewToOverwrite(FindObjectsOfType<CrewListItem>().ToList());
-            if (crewToOverwrite.Count == 0) updateDone = true;
+            if (HighLogic.CurrentGame.CrewRoster.GetAvailableCrewCount() == 0) updateDone = true;
             Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
             for (int i = 0; i < crewToOverwrite.Count; i++)
             {

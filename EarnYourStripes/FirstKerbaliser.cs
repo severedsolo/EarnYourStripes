@@ -22,6 +22,7 @@ namespace EarnYourStripes
         {
             if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().GenerateCrew) return;
             if (!EarnYourStripes.Instance.firstRun) return;
+            if (HighLogic.CurrentGame.CrewRoster.GetAssignedCrewCount() > 0) return;
             uiDialog = RandomKerbalDialog();
             Debug.Log("[FirstKerbaliser].Start");
         }
