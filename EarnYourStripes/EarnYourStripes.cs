@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using FlightTracker;
@@ -9,146 +10,92 @@ namespace EarnYourStripes
     public class EarnYourStripes : MonoBehaviour
     {
         public static EarnYourStripes Instance;
-        public List<string> promotedKerbals = new List<string>();
         public bool firstRun = true;
+        private List<ProtoCrewMember> crewMembers;
+        public string defaultSuit = "Basic";
+        public string veteranSuit = "Future";
+        public Dictionary<string, StripyKerbal> trackedCrew = new Dictionary<string, StripyKerbal>();
 
         private void Awake()
         {
             Instance = this;
-            Debug.Log("[EarnYourStripes]: Earn Your Stripes is Awake");
-        }
-        private void Start()
-        {
-            FlightTrackerApi.OnFlightTrackerUpdated.Add(FlightTrackerUpdated);
-            GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
-            GameEvents.onKerbalAddComplete.Add(OnKerbalAdded);
-            Debug.Log("[EarnYourStripes]: Registered Event Handlers");
-            StripHonours();
-        }
-
-        private void OnKerbalAdded(ProtoCrewMember kerbal)
-        {
-            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BasicSuit) kerbal.suit = ProtoCrewMember.KerbalSuit.Vintage;
-        }
-
-        private void StripHonours()
-        {
-            List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
-            if (crew.Count == 0) return;
-            for (int i = 0; i < crew.Count; i++)
+            FlightTrackerApi.OnFlightTrackerUpdated.Add(OnFlightTrackerUpdated);
+            GameEvents.OnCrewmemberHired.Add(OnCrewHire);
+            crewMembers = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
+            for (int i = 0; i < crewMembers.Count; i++)
             {
-                string p = crew.ElementAt(i).name;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug)
-                {
-                    Debug.Log("[EarnYourStripes]: Attempting to process StripHonours for " + p);
-                    Debug.Log("[EarnYourStripes]: promotedKerbals.Contains(p):" + promotedKerbals.Contains(p));
-                    Debug.Log("[EarnYourStripes]: Veteran Status:" + crew.ElementAt(i).veteran);
-                    Debug.Log("[EarnYourStripes]: StripHonours On: " + HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours);
-                }
-                if (!promotedKerbals.Contains(p) && crew.ElementAt(i).veteran && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours)
-                {
-                    crew.ElementAt(i).veteran = false;
-                    Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status as they haven't earned it");
-                }
-                else if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug)
-                {
-                    Debug.Log("[EarnYourStripes]: Failed to remove honours of " + p);
-                }
-
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BasicSuit) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Vintage;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().PilotsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().ScientistsAllowed && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().EngineersAllowed)
-                {
-                    if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().Debug) Debug.Log("[EarnYourStripes]: All classes allowed");
-                    continue;
-                }
-                switch(crew.ElementAt(i).trait)
-                {
-                    case "Pilot":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().PilotsAllowed)
-                        {
-                            crew.ElementAt(i).veteran = false;
-                            Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
-                        }
-                        break;
-                    case "Scientist":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().ScientistsAllowed)
-                        {
-                            crew.ElementAt(i).veteran = false;
-                            Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
-                        }
-                        break;
-                    case "Engineer":
-                        if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().EngineersAllowed)
-                        {
-                            crew.ElementAt(i).veteran = false;
-                            Debug.Log("[EarnYourStripes]: Removed " + p + "'s veteran status due to settings");
-                        }
-                        break;
-                    default:
-                        Debug.Log("[EarnYourStripes]: Attempted to remove " + p + "'s veteran status but couldn't figure out what class they were");
-                        break;
-                }
+                ProtoCrewMember p = crewMembers.ElementAt(i);
+                trackedCrew[p.name] = new StripyKerbal(p);
             }
-            UpdateSuits();
+            
         }
 
-        private void UpdateSuits()
+        private void OnCrewHire(ProtoCrewMember p, int numberOfEmployees)
         {
-            List<ProtoCrewMember> crew = HighLogic.CurrentGame.CrewRoster.Crew.ToList();
-            if (crew.Count == 0) return;
-            for (int i = 0; i < crew.Count; i++)
+            p.suit = GetSuit(p);
+        }
+
+        public ProtoCrewMember.KerbalSuit GetSuit(ProtoCrewMember p)
+        {
+            string suitToFind;
+            if (p.veteran) suitToFind = veteranSuit;
+            else suitToFind = defaultSuit;
+            switch (suitToFind)
             {
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BgSuits && crew.ElementAt(i).veteran) crew.ElementAt(i).suit = ProtoCrewMember.KerbalSuit.Future;
+                case "Basic": return ProtoCrewMember.KerbalSuit.Default; 
+                case "Vintage": return ProtoCrewMember.KerbalSuit.Vintage;
+                case "Future": return ProtoCrewMember.KerbalSuit.Future;
+                default: return ProtoCrewMember.KerbalSuit.Default;
             }
         }
-        private void OnGameSettingsApplied()
+
+      private void Start()
         {
-            Debug.Log("[EarnYourStripes]: OnGameSettingsApplied fired");
-            StripHonours();
+            //Remove veteranhood from Kerbals who don't deserve it.
+            if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours) return;
+            for (int i = 0; i < crewMembers.Count; i++)
+            {
+                ProtoCrewMember p = crewMembers.ElementAt(i);
+                StripyKerbal sk = trackedCrew[p.name];
+                p.veteran = sk.Promoted;
+                if (!sk.SuitSet)
+                {
+                    p.suit = GetSuit(p);
+                    sk.SuitSet = true;
+                }
+            }
         }
 
-        private void FlightTrackerUpdated (ProtoCrewMember p)
+        private void OnFlightTrackerUpdated(ProtoCrewMember p)
         {
-            Debug.Log("[EarnYourStripes]: FlightTrackerUpdated");
-            int flights = FlightTrackerApi.Instance.GetNumberOfFlights(p.name);
-            double met = FlightTrackerApi.Instance.GetRecordedMissionTimeHours(p.name);
-            int worldFirsts = FlightTrackerApi.Instance.GetNumberOfWorldFirsts(p.name);
-            Debug.Log("[EarnYourStripes]: Evaluating "+p.name+"'s chances of promotion");
-            if (!promotedKerbals.Contains(p.name) && EligibleForPromotion(flights, met, worldFirsts))
-            {
-                promotedKerbals.Add(p.name);
-                p.veteran = true;
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().BgSuits && p.veteran) p.suit = ProtoCrewMember.KerbalSuit.Future;
-                Debug.Log("[EarnYourStripes]: Promoting " + p.name);
-            }
-            UpdateSuits();
+            if (trackedCrew[p.name].EligibleForPromotion()) trackedCrew[p.name].Promote(p);
         }
 
-        private bool EligibleForPromotion(int flights, double met, int worldFirsts)
+        public void OnSave(ConfigNode saveNode)
         {
-            if (flights < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired)
+            for (int i = 0; i < trackedCrew.Count; i++)
             {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Flights "+flights+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired);
-                return false;
+                StripyKerbal s = trackedCrew.ElementAt(i).Value;
+                s.OnSave(saveNode);
             }
-
-            if (met < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired)
-            {
-                Debug.Log("[EarnYourStripes]: Promotion Rejected: Insufficient Hours "+met+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired);
-                return false;
-            }
-
-            if (worldFirsts >= 1 || !HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts) return true;
-            Debug.Log("[EarnYourStripes]: Promotion Rejected: No World Firsts");
-            return false;
         }
 
-        private void OnDestroy()
+        public void OnLoad(ConfigNode loadNode)
         {
-            GameEvents.OnGameSettingsApplied.Remove(OnGameSettingsApplied);
-            if (FlightTrackerApi.OnFlightTrackerUpdated != null) FlightTrackerApi.OnFlightTrackerUpdated.Remove(FlightTrackerUpdated);
-            GameEvents.onKerbalAddComplete.Remove(OnKerbalAdded);
-            Debug.Log("[EarnYourStripes]: Unregistered Event Handlers");
+            ConfigNode[] kerbalNodes = loadNode.GetNodes("STRIPYKERBAL");
+            for (int i = 0; i < kerbalNodes.Length; i++)
+            {
+                ConfigNode cn = kerbalNodes.ElementAt(i);
+                string kerbalName = cn.GetValue("Name");
+                //If Kerbal isn't in Tracked Crew they are no longer crew, so don't need to load them.
+                if (!trackedCrew.TryGetValue(kerbalName, out StripyKerbal s)) continue;
+                s.OnLoad(cn);
+            }
+        }
+        
+        private void OnDisable()
+        {
+            FlightTrackerApi.OnFlightTrackerUpdated.Remove(OnFlightTrackerUpdated);
         }
     }
 }

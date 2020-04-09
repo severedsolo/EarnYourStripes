@@ -54,3 +54,4 @@ C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Deb
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.dll
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.pdb
 C:/Users/evilp/OneDrive/Documents/GitHub/EarnYourStripes/EarnYourStripes/obj/Debug/EarnYourStripes.csprojAssemblyReference.cache
+C:\Users\evilp\Documents\GitHub\EarnYourStripes\EarnYourStripes\obj\Debug\EarnYourStripes.csprojAssemblyReference.cache

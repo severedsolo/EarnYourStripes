@@ -57,17 +57,12 @@ namespace EarnYourStripes
         [GameParameters.CustomIntParameterUI("Flight Hours", toolTip = "How many hours must a Kerbal have logged to be considered a veteran?", minValue = 0, maxValue = 10000)]
         public int FlightHoursRequired = 12;
 
-        [GameParameters.CustomParameterUI("Do Something Amazing?", toolTip = "Does the kerbal have to do perform a 'World First'?")]
-        public bool WorldFirsts = true;
+        [GameParameters.CustomIntParameterUI("Number of World Firsts", toolTip = "How many World Firsts must a kerbal accomplish before being promoted?")]
+        public int WorldFirsts = 1;
         
         [GameParameters.CustomParameterUI("Replace Starting Crew", toolTip = "Replace the 'Big 4' with a different starting crew?")]
         public bool GenerateCrew = true;
-
-        [GameParameters.CustomParameterUI("Use Vintage Suits by default (requires Making History)?")]
-        public bool BasicSuit = false;
-
-        [GameParameters.CustomParameterUI("Give Veterans their own suits (requires Breaking Ground)?")]
-        public bool BgSuits = true;
+        
     }
 
     [SuppressMessage("ReSharper", "ArrangeAccessorOwnerBody")]
