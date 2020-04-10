@@ -1,9 +1,6 @@
-﻿using System.Linq;
-using UnityEngine;
-
-namespace EarnYourStripes
+﻿namespace EarnYourStripes
 {
-    [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT, GameScenes.TRACKSTATION)]
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT, GameScenes.TRACKSTATION, GameScenes.EDITOR)]
     internal class StripesData : ScenarioModule
     {
         public override void OnSave(ConfigNode node)

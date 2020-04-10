@@ -27,7 +27,7 @@ namespace EarnYourStripes
             Debug.Log("[FirstKerbaliser].Start");
         }
 
-        private void LockCamera()
+        private static void LockCamera()
         {
             InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS, "EYSCameraLock");
         }
@@ -97,17 +97,13 @@ namespace EarnYourStripes
                 return;
             }
 
-            if (randomKerbals) uiDialog = RandomKerbalDialog();
-            else uiDialog = CustomKerbalDialog();
+            uiDialog = randomKerbals ? RandomKerbalDialog() : CustomKerbalDialog();
             invokingUi = false;
         }
 
         private PopupDialog CustomKerbalDialog()
         {
-            List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
-            dialogElements.Add(GenerateListOfKerbals());
-            dialogElements.Add(new DialogGUIButton("Add New Kerbal", NewKerbal));
-            dialogElements.Add(new DialogGUIButton("Done", () => ClearControlLock(false), true));
+            List<DialogGUIBase> dialogElements = new List<DialogGUIBase> {GenerateListOfKerbals(), new DialogGUIButton("Add New Kerbal", NewKerbal), new DialogGUIButton("Done", () => ClearControlLock(false), true)};
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new MultiOptionDialog("FirstKerbaliserCustomKerbalDialog", "", "Earn Your Stripes", UISkinManager.defaultSkin,
                     new Rect(0.5f, 0.5f, 135.0f, 90.0f), dialogElements.ToArray()), false, UISkinManager.defaultSkin);
@@ -173,8 +169,7 @@ namespace EarnYourStripes
 
         private void SwitchGender()
         {
-            if (kerbalToEdit.gender == ProtoCrewMember.Gender.Female) kerbalToEdit.gender = ProtoCrewMember.Gender.Male;
-            else kerbalToEdit.gender = ProtoCrewMember.Gender.Female;
+            kerbalToEdit.gender = kerbalToEdit.gender == ProtoCrewMember.Gender.Female ? ProtoCrewMember.Gender.Male : ProtoCrewMember.Gender.Female;
             Debug.Log("[EarnYourStripes]: " + kerbalToEdit.name + " Gender Change");
         }
 
@@ -187,8 +182,7 @@ namespace EarnYourStripes
 
         private PopupDialog BrokenDialog()
         {
-            List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
-            dialogElements.Add(new DialogGUILabel("Your choices were invalid. Try again"));
+            List<DialogGUIBase> dialogElements = new List<DialogGUIBase> {new DialogGUILabel("Your choices were invalid. Try again")};
             randomKerbals = !randomKerbals;
             allowMales = true;
             allowFemales = true;
@@ -228,11 +222,10 @@ namespace EarnYourStripes
                     HighLogic.CurrentGame.CrewRoster.Remove(pcm);
                     continue;
                 }
-
                 Debug.Log("[EarnYourStripes]: Generated " + pcm.name + " (" + pcm.trait + ")");
                 i++;
+                GameEvents.OnCrewmemberHired.Fire(pcm, i);
             }
-
             EarnYourStripes.Instance.firstRun = false;
         }
 
@@ -255,8 +248,7 @@ namespace EarnYourStripes
                     return false;
             }
 
-            if (!traits[trait]) return false;
-            return true;
+            return traits[trait];
         }
 
         private void GenerateBrokenDialog()
@@ -275,7 +267,7 @@ namespace EarnYourStripes
             return false;
         }
 
-        private Dictionary<string, bool> GetAvailableTraits()
+        private static Dictionary<string, bool> GetAvailableTraits()
         {
             ConfigNode[] experienceTraits = GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT");
             Dictionary<string, bool> traitTitles = new Dictionary<string, bool>();

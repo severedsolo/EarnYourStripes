@@ -34,7 +34,7 @@ namespace EarnYourStripes
             astronautComplexSpawned = true;
         }
 
-        private string ConvertUtToString(double time)
+        private static string ConvertUtToString(double time)
         {
             time = time / 60 / 60;
             time = (int)Math.Floor(time);
@@ -51,6 +51,7 @@ namespace EarnYourStripes
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation;
             List<CrewListItem> crewToOverwrite = GetCrewToOverwrite(FindObjectsOfType<CrewListItem>().ToList());
             if (HighLogic.CurrentGame.CrewRoster.GetAvailableCrewCount() == 0) updateDone = true;
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             Debug.Log("[EarnYourStripes]: Attempting to override AstronautComplex UI");
             for (int i = 0; i < crewToOverwrite.Count; i++)
             {
@@ -64,10 +65,10 @@ namespace EarnYourStripes
             }
         }
 
-        private List<CrewListItem> GetCrewToOverwrite(List<CrewListItem> crewItemContainers)
+        private static List<CrewListItem> GetCrewToOverwrite(IReadOnlyCollection<CrewListItem> crewItemContainers)
         {
             List<CrewListItem> crewToOverwrite = new List<CrewListItem>();
-            for (int i = 0; i < crewItemContainers.Count(); i++)
+            for (int i = 0; i < crewItemContainers.Count; i++)
             {
                 CrewListItem crewContainer = crewItemContainers.ElementAt(i);
                 ProtoCrewMember p = crewContainer.GetCrewRef();

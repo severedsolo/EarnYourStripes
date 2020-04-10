@@ -63,6 +63,11 @@ namespace EarnYourStripes
         [GameParameters.CustomParameterUI("Replace Starting Crew", toolTip = "Replace the 'Big 4' with a different starting crew?")]
         public bool GenerateCrew = true;
         
+        [GameParameters.CustomIntParameterUI("Default Suit", toolTip = "0 = Basic, 1 = Vintage, 2 = SciFi", minValue = 0, maxValue = 2, stepSize = 1)]
+        public int DefaultSuit = 0;
+        
+        [GameParameters.CustomIntParameterUI("Veteran Suit", toolTip = "0 = Basic, 1 = Vintage, 2 = SciFi", minValue = 0, maxValue = 2, stepSize = 1)]
+        public int VeteranSuit = 2;
     }
 
     [SuppressMessage("ReSharper", "ArrangeAccessorOwnerBody")]

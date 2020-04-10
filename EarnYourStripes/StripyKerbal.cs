@@ -1,13 +1,14 @@
 ﻿using FlightTracker;
+using UnityEngine;
 
 namespace EarnYourStripes
 {
     public class StripyKerbal
     {
-        public bool Promoted = false;
-        public bool SuitSet = false;
-        private string kerbalName;
-        private string kerbalClass;
+        public bool Promoted;
+        public bool SuitSet;
+        private readonly string kerbalName;
+        private readonly string kerbalClass;
 
         public StripyKerbal(ProtoCrewMember p)
         {
@@ -18,14 +19,36 @@ namespace EarnYourStripes
 
         public bool EligibleForPromotion()
         {
-            if (ClassExcluded(kerbalClass)) return false;
-            if (FlightTrackerApi.Instance.GetNumberOfFlights(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired) return false;
-            if (FlightTrackerApi.Instance.GetRecordedMissionTimeHours(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired) return false;
-            if (FlightTrackerApi.Instance.GetNumberOfWorldFirsts(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts) return false;
+            if (Promoted) return true;
+            Debug.Log("[EarnYourStripes]: Checking "+kerbalName+" eligibility for promotion");
+            if (ClassExcluded(kerbalClass))
+            {
+                Debug.Log("[EarnYourStripes] "+kerbalClass+" not allowed to be a veteran. Promotion Denied");
+                return false;
+            }
+
+            if (FlightTrackerApi.Instance.GetNumberOfFlights(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired)
+            {
+                Debug.Log("[EarnYourStripes]: "+kerbalName+" hasn't recorded enough flights ("+FlightTrackerApi.Instance.GetNumberOfFlights(kerbalName)+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().NumberOfFlightsRequired+")");
+                return false;
+            }
+
+            if (FlightTrackerApi.Instance.GetRecordedMissionTimeHours(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired)
+            {
+                Debug.Log("[EarnYourStripes]: "+kerbalName+" hasn't recorded enough hours ("+FlightTrackerApi.Instance.GetRecordedMissionTimeHours(kerbalName)+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().FlightHoursRequired+")");
+                return false;
+            }
+
+            if (FlightTrackerApi.Instance.GetNumberOfWorldFirsts(kerbalName) < HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts)
+            {
+                Debug.Log("[EarnYourStripes]: "+kerbalName+" hasn't recorded enough World Firsts ("+FlightTrackerApi.Instance.GetNumberOfWorldFirsts(kerbalName)+"/"+HighLogic.CurrentGame.Parameters.CustomParams<StripeSettings>().WorldFirsts+")");
+                return false;
+            }
+            Debug.Log("[EarnYourStripes]: Promoting "+kerbalName);
             return true;
         }
 
-        private bool ClassExcluded(string trait)
+        private static bool ClassExcluded(string trait)
         {
             switch (trait)
             {
@@ -46,13 +69,18 @@ namespace EarnYourStripes
             cn.SetValue("Name", kerbalName, true);
             cn.SetValue("SuitSet", SuitSet, true);
             cn.SetValue("Promoted", Promoted, true);
+            saveNode.AddNode(cn);
         }
 
         public void Promote(ProtoCrewMember p)
         {
             if (!Promoted) SuitSet = false;
             p.veteran = true;
-            if(!SuitSet) p.suit = EarnYourStripes.Instance.GetSuit(p);
+            if (!SuitSet)
+            {
+                p.suit = EarnYourStripes.Instance.GetSuit(p);
+                SuitSet = true;
+            }
             Promoted = true;
         }
 
