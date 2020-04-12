@@ -224,7 +224,6 @@ namespace EarnYourStripes
                 }
                 Debug.Log("[EarnYourStripes]: Generated " + pcm.name + " (" + pcm.trait + ")");
                 i++;
-                GameEvents.OnCrewmemberHired.Fire(pcm, i);
             }
             EarnYourStripes.Instance.firstRun = false;
         }
