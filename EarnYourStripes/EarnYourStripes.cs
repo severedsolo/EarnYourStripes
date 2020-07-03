@@ -84,11 +84,11 @@ namespace EarnYourStripes
       }
 
       private void OnFlightTrackerUpdated(ProtoCrewMember p)
-        {
-            if (trackedCrew[p.name].EligibleForPromotion()) trackedCrew[p.name].Promote(p);
-        }
+      {
+          if (trackedCrew[p.name].EligibleForPromotion()) trackedCrew[p.name].Promote(p);
+      }
 
-        public void OnSave(ConfigNode saveNode)
+      public void OnSave(ConfigNode saveNode)
         {
             for (int i = 0; i < trackedCrew.Count; i++)
             {
