@@ -59,7 +59,7 @@ namespace EarnYourStripes
             {
                 ProtoCrewMember p = crewMembers.ElementAt(i);
                 StripyKerbal sk = trackedCrew[p.name];
-                if (HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours)
+                if (StripHonours(p))
                 {
                     p.veteran = sk.Promoted;
                     Debug.Log("[EarnYourStripes]: StripHonours for "+p.name+" Veteran: "+p.veteran);
@@ -71,6 +71,12 @@ namespace EarnYourStripes
                 sk.SuitSet = true;
             }
         }
+
+      private bool StripHonours(ProtoCrewMember p)
+      {
+          if (p.isHero && HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonoursBig4) return true;
+          return HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonoursOthers;
+      }
 
       private static string SetDefaultSuit(int selection)
       {

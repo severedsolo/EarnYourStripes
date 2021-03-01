@@ -215,7 +215,7 @@ namespace EarnYourStripes
             while (i < numberOfRandomKerbals)
             {
                 pcm = HighLogic.CurrentGame.CrewRoster.GetNewKerbal();
-                if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonours) pcm.veteran = true;
+                if (!HighLogic.CurrentGame.Parameters.CustomParams<StripeSettingsClassRestrictions>().RemoveExistingHonoursBig4) pcm.veteran = true;
                 if (!HighLogic.CurrentGame.Parameters.CustomParams<GameParameters.AdvancedParams>().KerbalExperienceEnabled(HighLogic.CurrentGame.Mode)) KerbalRoster.SetExperienceLevel(pcm, 5);
                 if (!ValidKerbal(pcm.gender, pcm.trait))
                 {

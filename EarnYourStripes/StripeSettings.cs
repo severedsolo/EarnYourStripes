@@ -80,8 +80,10 @@ namespace EarnYourStripes
         public override int SectionOrder { get { return 2; } }
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
         public override bool HasPresets { get { return false; } }
-        [GameParameters.CustomParameterUI("Remove Existing Honours?", toolTip = "Remove Honours from the Big 4 if they haven't earned it")]
-        public bool RemoveExistingHonours = true;
+        [GameParameters.CustomParameterUI("Strip Honours (Big 4)", toolTip = "Remove Honours from the Big 4 if they haven't earned it")]
+        public bool RemoveExistingHonoursBig4 = true;
+        [GameParameters.CustomParameterUI("Strip Honours (Other)", toolTip = "Remove Honours from any veterans who haven't earned it (rescue missions etc)")]
+        public bool RemoveExistingHonoursOthers = true;
         [GameParameters.CustomParameterUI("Allow Pilot Veterans")]
         public bool PilotsAllowed = true;
         [GameParameters.CustomParameterUI("Allow Scientist Veterans")]
